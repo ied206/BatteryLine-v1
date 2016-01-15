@@ -1,3 +1,5 @@
+// This program is licensed under MIT license.
+
 #include "Var.h"
 
 #include <stdio.h>

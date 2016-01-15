@@ -5,7 +5,7 @@
 	<stdint.h>
 	<windows.h>
 
-1452776974 source:d:\jang\build\source\c\batteryline\batstat.c
+1452876643 source:d:\jang\build\source\c\batteryline\batstat.c
 	"Var.h"
 	<stdio.h>
 	<stdlib.h>
@@ -19,10 +19,10 @@
 
 1452709562 d:\jang\build\source\c\batteryline\batstat.h
 
-1452762722 d:\jang\build\source\c\batteryline\errorhandle.h
+1452876597 d:\jang\build\source\c\batteryline\errorhandle.h
 	<stdint.h>
 
-1452763468 d:\jang\build\source\c\batteryline\var.h
+1452875719 d:\jang\build\source\c\batteryline\var.h
 	<windows.h>
 	<stdint.h>
 
@@ -40,7 +40,7 @@
 	"BatStat.h"
 	"ErrorHandle.h"
 
-1452762753 source:d:\jang\build\source\c\batteryline\errorhandle.c
+1452876730 source:d:\jang\build\source\c\batteryline\errorhandle.c
 	"Var.h"
 	<stdio.h>
 	<stdlib.h>
@@ -48,7 +48,7 @@
 	<strsafe.h>
 	"ErrorHandle.h"
 
-1452842792 source:d:\jang\build\source\c\batteryline\main.c
+1452850271 source:d:\jang\build\source\c\batteryline\main.c
 	"Var.h"
 	<stdio.h>
 	<stdlib.h>

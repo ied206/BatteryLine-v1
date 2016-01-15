@@ -15,10 +15,10 @@
 
 const uint16_t BOM = 0xFEFF;
 
-// Default Setting File in string
+// Default Setting File as unicode string
 // Must have \r\n in the end, because parsing algorithm slice a line by \r\n
-wchar_t* BL_DefaultSettingStr = L"# Joveler's BatteryLine\r\n\r\n"
-								"[Setting]\r\n"
+wchar_t* BL_DefaultSettingStr = L"# Joveler's BatteryLine v1.0\r\n\r\n"
+								"[General]\r\n"
 								"# showcharge   : Show BatteryLine when charging\r\n"
 								"#                  {true, false}\r\n"
 								"# monitor      : Which monitor to view BatteryLine?\r\n"
@@ -52,11 +52,10 @@ wchar_t* BL_DefaultSettingStr = L"# Joveler's BatteryLine\r\n\r\n"
 								"# Support up to 16 thresholds\r\n"
 								"# Format : {LowEdge, HighEdge, R, G, B}\r\n"
 								"color = 0, 20, 237, 28, 36\r\n"
-								"color = 20, 50, 255, 201, 14\r\n";
+								"color = 20, 50, 255, 140, 15\r\n";
 
 int BLBS_InitBLOption(BL_OPTION* bl_option)
 {
-    // bl_option.chargecolor =
     return 0;
 }
 
@@ -65,30 +64,33 @@ int BLBS_ReadSetting()
 	// Init and declare variables
     HANDLE hFile;
 	uint8_t make_ini = FALSE; // If this is true, use default option
-	wchar_t* file_buf = NULL;
-	uint32_t file_size = 0;
+	wchar_t* file_buf = NULL, *path_buf = NULL;
+	uint32_t file_size = 0, path_size = 0;
 
-	/*
 	// Get current directory's string length
-    file_size = GetCurrentDirectoryW(file_size, file_buf);
-	if (file_size == 0)
+    path_size = GetCurrentDirectoryW(path_size, path_buf);
+	if (path_size == 0)
 		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
 
 	// Allocate file_buf to write absolute path
-	file_buf = (PWSTR) malloc(sizeof(wchar_t) * file_size);
-	if (0 == GetCurrentDirectoryW(file_size, file_buf)) // Error!
+	path_size = path_size + wcslen(BL_SettingFile) + 8;
+	path_buf = (PWSTR) malloc(sizeof(wchar_t) * path_size); // 8 for \\ and NULL
+	if (0 == GetCurrentDirectoryW(path_size, path_buf)) // Error!
 	{
-		free(file_buf);
+		free(path_buf);
 		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
 	}
 
-	// But I am using BL_SettingFile constant to open ini! Comment this.
-	*/
+	StringCchCatW(path_buf, path_size, L"\\");
+	StringCchCatW(path_buf, path_size, BL_SettingFile);
+	#ifdef _DEBUG_CONSOLE
+	printf("[IniFile]\npath_buf    : %S\n\n", path_buf);
+	#endif // _DEBUG_CONSOLE
 
 	// File IO
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb540534%28v=vs.85%29.aspx
 	// Open File
-	hFile = CreateFileW(BL_SettingFile,				// lpFileName
+	hFile = CreateFileW(path_buf,				// lpFileName
 					  GENERIC_READ | GENERIC_WRITE, // dwDesiredAccess
 					  FILE_SHARE_READ, 				// dwShareMode
 					  NULL, 						// lpSecurityAttributes
@@ -111,7 +113,7 @@ int BLBS_ReadSetting()
 		uint32_t written_byte = 0;
 
 		// Write default setting to file
-		hFile = CreateFileW(BL_SettingFile,				// lpFileName
+		hFile = CreateFileW(path_buf,				// lpFileName
 							GENERIC_READ | GENERIC_WRITE, // dwDesiredAccess
 							0, 						// dwShareMode
 							NULL, 						// lpSecurityAttributes
@@ -136,7 +138,7 @@ int BLBS_ReadSetting()
 		// Close Handle
 		CloseHandle(hFile);
 
-        // file_buf will point to BL_DefaultSettingStr
+        // point file_buf to BL_DefaultSettingStr, no dyn alloc
 		file_buf = BL_DefaultSettingStr;
 	}
 	else
@@ -144,7 +146,7 @@ int BLBS_ReadSetting()
 		uint32_t read_byte = 0;
 		size_t sztmp = 0;
 
-		// Get file size, and allocate file_buf
+		// Get file size, and dyn allocate file_buf
 		file_size = GetFileSize(hFile, NULL);
 		file_buf = (wchar_t*) malloc(file_size+16);
 		memset((void*) file_buf, 0, file_size+16);
@@ -156,7 +158,7 @@ int BLBS_ReadSetting()
 					  (DWORD*) &read_byte, // lpNumberOfBytesRead
 					  NULL)) 		// lpOverlapped
 			JV_ErrorHandle(JVERR_ReadFile, TRUE);
-		// Is all byte successfully read?
+		// Is all bytes successfully read?
 		if (read_byte != file_size)
 			JV_ErrorHandle(JVERR_FILEIO_READ_BYTES, FALSE);
 		// Close Handle
@@ -169,32 +171,35 @@ int BLBS_ReadSetting()
 		file_buf[sztmp+2] = L'\0';
 	}
 
-	// Parse ini File
+	// Do not need absolute path of BatteryLine.ini
+	free(path_buf);
+	path_buf = NULL;
+
+	// Parse ini File - Too complex...
+	wchar_t* str_cursor = NULL, *str_next = NULL;
 	wchar_t line_token[BS_TOKEN_BUF_SIZE]; // Unicode LineFeed : \r\n (00d0 00a0)
 	wchar_t line_rawbuf[BS_LINE_BUF_SIZE], line_buf[BS_LINE_BUF_SIZE];
-	wchar_t* str_cursor = NULL, *str_next = NULL;
 	size_t line_len = 0;
-	uint8_t state_section = BS_SECTION_OFF;
 	wchar_t* equal_pos = NULL;
 	wchar_t equal_left[BS_LINE_BUF_SIZE], equal_right[BS_LINE_BUF_SIZE];
+	uint8_t state_section = BS_SECTION_OFF;
 	uint8_t color_idx = 0;
+	BL_OPTION valid;
 
 	// 01 using \r\n as token, traverse all lines in BL_SettingFile
-
-	// 03 []이 있나? -> section 시작
-	// 04 []이 없다 -> 빈 칸 제거 (Tab, Space 제거)
-	// 05 = 기준 left string -> 어떤 option에 넣을지, 어떻게 right string을 처리할지 결정
-	// 06 = 기준 right string -> 단일 값 파싱 / , 기준 여러값 파싱
-	// 07 파싱한 값을 option 구조체에 넣는다
-	// StringCchCopyW(line_token, BS_TOKEN_BUF_SIZE, L"\r\n"); // token to specify end of line
 	line_token[0] = L'\r';
 	line_token[1] = L'\n';
 	line_token[2] = L'\0';
+	// str_cursor will serve as cursor for each line
 	str_cursor = file_buf;
+	// 'valid' will be used to check wether these option is already set - FALSE for not set, TRUE for set
+	ZeroMemory(&valid, sizeof(BL_OPTION));
 
+	// Parsing loop. Escape when meet EOF
 	while (1)
 	{
-		// 02 한줄을 복사해낸다
+		// 02 Copy one line to line_rawbuf.
+		// 02 Note that line_rawbuf contains 'raw' strings, which has tab, space, \r, \n.
 		str_next = StrStrW(str_cursor, line_token); // Start of next line
 		if (str_next == NULL) // No more line, EOF
 			break;
@@ -202,35 +207,35 @@ int BLBS_ReadSetting()
 		StringCchCopyNW(line_rawbuf, BS_LINE_BUF_SIZE, str_cursor+1, line_len-1); // Copy one line to line_buf, +1 for remove first \r\n, -1 for remove last \r
 		str_cursor = str_next + 1; // Fot next iteration, move cursor to next line
 
-		/*
-		#ifdef _DEBUG_CONSOLE
-		wprintf(L"line_rawbuf : %ws\n", line_rawbuf);
-		wprintf(L"state       : %u\n", state_section);
+		// For debugging, there is too many segfaults in parsing alg!
+		#ifdef _DEBUG_PARSING
+		printf("line_rawbuf : %S\n", line_rawbuf);
+		printf("state       : %u\n", state_section);
 		#endif
-		*/
 
-		// State Machine
+		// Finite State Machine Model
+		// 03 line_rawbuf has [] -> start a section, represent as 'state'
 		if (StrChrW(line_rawbuf, L'[') != NULL && StrChrW(line_rawbuf, L']') != NULL)
 		{ // Contains [ ]
 			switch (state_section)
 			{
 			case BS_SECTION_OFF:
-				if (StrStrIW(line_rawbuf, L"[Setting]") != NULL)
-					state_section = BS_SECTION_SETTING;
+				if (StrStrIW(line_rawbuf, L"[General]") != NULL)
+					state_section = BS_SECTION_GENERAL;
 				else if (StrStrIW(line_rawbuf, L"[Color]") != NULL)
 					state_section = BS_SECTION_COLOR;
 				break;
-			case BS_SECTION_SETTING:
-				if (StrStrIW(line_rawbuf, L"[Setting]") != NULL)
-					state_section = BS_SECTION_SETTING;
+			case BS_SECTION_GENERAL:
+				if (StrStrIW(line_rawbuf, L"[General]") != NULL)
+					state_section = BS_SECTION_GENERAL;
 				else if (StrStrIW(line_rawbuf, L"[Color]") != NULL)
 					state_section = BS_SECTION_COLOR;
 				else
 					state_section = BS_SECTION_OFF;
 				break;
 			case BS_SECTION_COLOR:
-				if (StrStrIW(line_rawbuf, L"[Setting]") != NULL)
-					state_section = BS_SECTION_SETTING;
+				if (StrStrIW(line_rawbuf, L"[General]") != NULL)
+					state_section = BS_SECTION_GENERAL;
 				else if (StrStrIW(line_rawbuf, L"[Color]") != NULL)
 					state_section = BS_SECTION_COLOR;
 				else
@@ -238,17 +243,21 @@ int BLBS_ReadSetting()
 				break;
 			}
 		}
-		else if (line_rawbuf[0] != L'#') // This line is not comment
-		{ // Do not contain []
+		// 04 line_rawbuf does not have [] -> remove Tab, Space, \r, \n and put into line_buf
+		else if (line_rawbuf[0] != L'#') // This line is not comment and do not contain []
+		{
 			int32_t dword = 0;
 			uint8_t lowedge8 = 0, highedge8 = 0, r8 = 0, g8 = 0, b8 = 0;
 			wchar_t quote_tmp[BS_TOKEN_BUF_SIZE] = {0};
 			wchar_t* quote_pos = NULL, *quote_next = NULL;
 			uint32_t x = 0;
 
-			// Remove Tab, Space, \r, \n from line_rawbuf and put into line_buf
+			// 04 Remove Tab, Space, \r, \n from line_rawbuf and put into line_buf
 			for (uint32_t i = 0; i < line_len; i++)
 			{
+				if (line_rawbuf[i] == L'#') // if we meet # in the middle, ignore remnant characters
+                    break;
+
 				if (line_rawbuf[i] != L'\t' && line_rawbuf[i] != L' ' && line_rawbuf[i] != L'\r' && line_rawbuf[i] != L'\n')
 				{
 					line_buf[x] = line_rawbuf[i];
@@ -258,20 +267,26 @@ int BLBS_ReadSetting()
 			line_buf[x] = L'\0';
 			line_len = x;
 
+			#ifdef _DEBUG_PARSING
+			printf("line_buf    : %S\n", line_buf);
+			#endif
+
 			switch (state_section)
 			{
 			case BS_SECTION_OFF:
 				break;
-			case BS_SECTION_SETTING:
+			case BS_SECTION_GENERAL:
+				// 05 using = as basis, cut left sting and right string.
+				// 06 left string : which option to set?
+				// 06 right string : how to parse right string?
 				equal_pos = StrChrW(line_buf, L'=');
-				if (equal_pos == NULL)
+				if (equal_pos == NULL) // no '='
 				{
-					state_section = BS_SECTION_OFF; // = 이 없을 때는 패스
-					continue;
+					state_section = BS_SECTION_OFF; // invalid option, think this as end of section.
+					continue; // so ignore this line and go to next line
 				}
 				StringCchCopyNW(equal_left, BS_LINE_BUF_SIZE, line_buf, equal_pos-line_buf); // Copy left part
 				StringCchCopyW(equal_right, BS_LINE_BUF_SIZE, line_buf+(equal_pos-line_buf+1)); // Copy right part
-
 
 				if (StrCmpIW(equal_left, L"showcharge") == 0)
 				{ // {true, false}
@@ -281,6 +296,7 @@ int BLBS_ReadSetting()
 						option.showcharge = FALSE;
 					else
 						JV_ErrorHandle(JVERR_OPT_INI_INVALID_SHOWCHARGE, FALSE);
+					valid.showcharge = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"monitor") == 0)
 				{ // {primary, 1, 2, ... , 255}
@@ -295,6 +311,7 @@ int BLBS_ReadSetting()
 							JV_ErrorHandle(JVERR_OPT_INI_NOT_EXIST_MONITOR, FALSE);
 						option.monitor = (uint8_t) dword;
 					}
+					valid.monitor = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"position") == 0)
 				{ // {top, bottom, left, right}
@@ -308,6 +325,7 @@ int BLBS_ReadSetting()
 						option.position = BL_POS_RIGHT;
 					else
 						JV_ErrorHandle(JVERR_OPT_INI_INVALID_POSITION, FALSE);
+					valid.position = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"taskbar") == 0)
 				{ // {ignore, evade}
@@ -317,6 +335,7 @@ int BLBS_ReadSetting()
 						option.taskbar = BL_TASKBAR_EVADE;
 					else
 						JV_ErrorHandle(JVERR_OPT_INI_INVALID_TASKBAR, FALSE);
+					valid.taskbar = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"transparency") == 0)
 				{ // {0 <= number <= 255}
@@ -324,6 +343,7 @@ int BLBS_ReadSetting()
 					if (!(0 <= dword && dword <= 255))
 						JV_ErrorHandle(JVERR_OPT_INI_INVALID_TRANSPARENCY, FALSE);
 					option.transparency = (uint8_t) dword;
+					valid.transparency = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"height") == 0)
 				{ // {1 <= number <= 255}
@@ -331,15 +351,18 @@ int BLBS_ReadSetting()
 					if (!(1 <= dword && dword <= 255))
 						JV_ErrorHandle(JVERR_OPT_INI_INVALID_HEIGHT, FALSE);
 					option.height = (uint8_t) dword;
+					valid.height = TRUE;
 				}
 				break;
 			case BS_SECTION_COLOR:
-				// Then, this is description of one section (Section이 on이여야 한다)
+				// 05 using = as basis, cut left sting and right string.
+				// 06 left string : which option to set?
+				// 06 right string : how to parse right string?
 				equal_pos = StrChrW(line_buf, L'=');
-				if (equal_pos == NULL)
+				if (equal_pos == NULL) // no '='
 				{
-					state_section = BS_SECTION_OFF; // = 이 없을 때는 패스
-					continue;
+					state_section = BS_SECTION_OFF; // invalid option, think this as end of section.
+					continue; // so ignore this line and go to next line
 				}
 				StringCchCopyNW(equal_left, BS_LINE_BUF_SIZE, line_buf, equal_pos-line_buf); // Copy left part
 				StringCchCopyW(equal_right, BS_LINE_BUF_SIZE, line_buf+(equal_pos-line_buf+1)); // Copy right part
@@ -369,6 +392,7 @@ int BLBS_ReadSetting()
 						}
 					}
 					option.defaultcolor = RGB(r8, g8, b8);
+					valid.defaultcolor = TRUE;
 				}
 				else if (!StrCmpIW(equal_left, L"chargecolor"))
 				{ // Format : {R, G, B}
@@ -394,6 +418,7 @@ int BLBS_ReadSetting()
 						}
 					}
 					option.chargecolor = RGB(r8, g8, b8);
+					valid.chargecolor = TRUE;
 				}
 				else if (!StrCmpIW(equal_left, L"fullcolor"))
 				{ // Format : {R, G, B}
@@ -419,6 +444,7 @@ int BLBS_ReadSetting()
 						}
 					}
 					option.fullcolor = RGB(r8, g8, b8);
+					valid.fullcolor = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"color") == 0)
 				{ // {LowEdge, HighEdge, R, G, B}, Support up to 16 thresholds
@@ -495,8 +521,15 @@ int BLBS_ReadSetting()
 		printf("threshold[%02d] = %u\n", 2*i+1, option.threshold[2*i+1]);
 	}
 	putchar('\n');
-	puts("[Event]"); // For WndProcedure
+	puts("[Event]"); // For WndProcedure Debug Message
  	#endif
+
+	// Check necessary options are read successfully
+    if (!(valid.showcharge && valid.monitor && valid.position && valid.taskbar && valid.transparency && valid.height // Section [General]
+		&& valid.defaultcolor && valid.chargecolor && valid.fullcolor)) // Section [Color]
+	{
+        JV_ErrorHandle(JVERR_OPT_INI_IMPERFECT_OPTIONS, FALSE);
+	}
 
 	return 0;
 }
@@ -514,10 +547,10 @@ int BLBS_GetBatteryStat()
 	switch (stat.ACLineStatus)
 	{
 	case 0: // AC Off
-		msg_ac = L"Battery Mode";
+		msg_ac = L"Battery";
 		break;
 	case 1: // AC OnS
-		msg_ac = L"AC Mode";
+		msg_ac = L"AC";
 		break;
 	case 255: // Unknown
 		msg_ac = L"Unknown";
@@ -532,9 +565,9 @@ int BLBS_GetBatteryStat()
 		msg_charge = L"Using Battery";
 
 	StringCchPrintfW(fullmsg, BS_STRING_BUF_SIZE,
-					L"ACLineStatus : %ws\n"
-					L"BatteryFlag : %ws\n"
-					L"BatteryLifePercent : %d%%\n",
+					L"Power Source : %ws\n"
+					L"Battery Status : %ws\n"
+					L"Battery Percent : %d%%\n",
 					msg_ac, msg_charge, stat.BatteryLifePercent);
 	MessageBoxW(NULL, fullmsg, L"Power Info", MB_ICONINFORMATION | MB_OK);
 // DEBUG Information End

@@ -94,6 +94,11 @@ void JV_ErrorHandle(int code, int iswinapi)
 		msg =	"ErrorMessage : JVERR_FILEIO_READ_BYTES\n"
 				"In ReadFile, nNumberOfBytesToRead != lpNumberOfBytesRead\n";
 		break;
+	case JVERR_OPT_INI_IMPERFECT_OPTIONS:
+		msg =	"ErrorMessage : JVERR_OPT_INI_IMPERFECT_OPTIONS\n"
+				"Some options in BatteryLine.ini is missing.\n"
+				"Try deleting BatteryLine.ini and run BatteryLine again.\n";
+		break;
 	case JVERR_OPT_INI_INVALID_SHOWCHARGE:
 		msg =	"ErrorMessage : JVERR_OPT_INI_INVALID_SHOWCHARGE\n"
 				"Invalid Option in BetteryLine.ini. Check \'showcharge\'.\n";

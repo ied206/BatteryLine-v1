@@ -12,8 +12,10 @@
 #include <windows.h>
 #include <stdint.h>
 
+// MACRO for DEBUG
 #ifdef _DEBUG
 	#define _DEBUG_CONSOLE
+	//#define _DEBUG_PARSING
 #endif
 
 #define TRUE	1
@@ -48,7 +50,7 @@
 #define BS_STRING_BUF_SIZE	2048
 
 #define BS_SECTION_OFF		0
-#define BS_SECTION_SETTING	1
+#define BS_SECTION_GENERAL	1
 #define BS_SECTION_COLOR	2
 
 #define BS_OPT_SHOWCHARGE	1
@@ -70,15 +72,15 @@
 
 struct bl_option
 {
-	uint8_t showcharge;	// 충전할 때 계속 표시할까
+	uint8_t showcharge;		// 충전할 때 계속 표시할까
 	uint8_t monitor;		// 어떤 모니터에 표시할까
 	uint8_t position;		// 어디에 표시할까
 	uint8_t taskbar;		// 작업표시줄이랑 겹치면 회피할까?
 	uint8_t transparency;	// 투명도
-	uint8_t height;		// 배터리 표시줄 두께, In Pixel
+	uint8_t height;			// 배터리 표시줄 두께, In Pixel
 	COLORREF defaultcolor;	// 배터리 표시줄 기본 색
 	COLORREF chargecolor;	// 배터리 표시줄 충전시 색
-	COLORREF fullcolor;	// 배터리 표시줄 충전시 색
+	COLORREF fullcolor;		// 배터리 표시줄 충전완료 색
 	COLORREF color[BL_COLOR_LEVEL];			// 배터리 표시줄 색
 	uint8_t threshold[BL_COLOR_LEVEL*2];	// 배터리 색 경계
 };
