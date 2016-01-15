@@ -285,8 +285,8 @@ void BLCB_WM_POWERBROADCAST(HWND hWnd)
 void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit)
 {
 	BLDL_DelTrayIcon(hWnd, BL_SysTrayID_ON);
-	BLDL_AddTrayIcon(hWnd, BL_SysTrayID_OFF, NIF_INFO, 0, L"BatteryLine OFF");
-	BLDL_DelTrayIcon(hWnd, BL_SysTrayID_OFF);
+	// BLDL_AddTrayIcon(hWnd, BL_SysTrayID_OFF, NIF_INFO, 0, L"BatteryLine OFF");
+	// BLDL_DelTrayIcon(hWnd, BL_SysTrayID_OFF);
 
 	UnregisterPowerSettingNotification(not_bat_per);
 	UnregisterPowerSettingNotification(not_power_src);
@@ -347,7 +347,6 @@ void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR
 	ZeroMemory(&nid, sizeof(NOTIFYICONDATA));
 
 	// Notification Icon
-
 	nid.cbSize 		= sizeof(NOTIFYICONDATA);
 	nid.hWnd 		= hWnd;
 	nid.uID 		= uID;
@@ -355,7 +354,7 @@ void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR
 	if (uCallbackMsg != 0) // Message 안 던지고 처리
 		nid.uCallbackMessage = uCallbackMsg;
 #ifdef _MSC_VER
-	LoadIconMetric(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), LIM_SMALL, &(nid.hIcon)); // Load the icon for high DPI.
+	LoadIconMetric(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), LIM_SMALL, &(nid.hIcon)); // Load the icon for high DPI. However, MinGW-w64 seems has broken for this function...
 #else
 	nid.hIcon 		= (HICON) LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 #endif

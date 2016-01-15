@@ -98,7 +98,7 @@ extern SYSTEM_POWER_STATUS stat;
 extern BL_OPTION option;
 extern HINSTANCE g_hInst;
 extern int g_nMon; // Number of monitors installed on this system
-extern BL_MONRES* monres;
+extern BL_MONRES* g_monres;
 // http://www.transmissionzero.co.uk/computing/win32-apps-with-mingw/
 
 #endif // VAR_H_INCLUDED

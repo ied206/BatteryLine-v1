@@ -20,7 +20,7 @@ SYSTEM_POWER_STATUS stat;
 BL_OPTION option;
 HINSTANCE g_hInst;
 int g_nMon; // Number of monitors installed on this system
-BL_MONRES* monres;
+BL_MONRES* g_monres;
 
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -119,7 +119,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 				#ifdef _DEBUG_CONSOLE
 				puts("  ID_ABOUT");;
 				#endif // _DEBUG_CONSOLE
-				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d (%dbit)\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDate());
+				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d (%dbit)\nVisit https://joveler.kr/BatteryLine\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDate());
 				MessageBoxW(hWnd, msgbox, L"BatteryLine", MB_ICONINFORMATION | MB_OK );
 				break;
 			case ID_SETTING:

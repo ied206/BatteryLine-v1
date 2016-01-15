@@ -54,11 +54,6 @@ wchar_t* BL_DefaultSettingStr = L"# Joveler's BatteryLine v1.0\r\n\r\n"
 								"color = 0, 20, 237, 28, 36\r\n"
 								"color = 20, 50, 255, 140, 15\r\n";
 
-int BLBS_InitBLOption(BL_OPTION* bl_option)
-{
-    return 0;
-}
-
 int BLBS_ReadSetting()
 {
 	// Init and declare variables
@@ -528,7 +523,7 @@ int BLBS_ReadSetting()
     if (!(valid.showcharge && valid.monitor && valid.position && valid.taskbar && valid.transparency && valid.height // Section [General]
 		&& valid.defaultcolor && valid.chargecolor && valid.fullcolor)) // Section [Color]
 	{
-        JV_ErrorHandle(JVERR_OPT_INI_IMPERFECT_OPTIONS, FALSE);
+        JV_ErrorHandle(JVERR_OPT_INI_MISSING_OPTIONS, FALSE);
 	}
 
 	return 0;

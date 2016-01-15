@@ -94,8 +94,8 @@ void JV_ErrorHandle(int code, int iswinapi)
 		msg =	"ErrorMessage : JVERR_FILEIO_READ_BYTES\n"
 				"In ReadFile, nNumberOfBytesToRead != lpNumberOfBytesRead\n";
 		break;
-	case JVERR_OPT_INI_IMPERFECT_OPTIONS:
-		msg =	"ErrorMessage : JVERR_OPT_INI_IMPERFECT_OPTIONS\n"
+	case JVERR_OPT_INI_MISSING_OPTIONS:
+		msg =	"ErrorMessage : JVERR_OPT_INI_MISSING_OPTIONS\n"
 				"Some options in BatteryLine.ini is missing.\n"
 				"Try deleting BatteryLine.ini and run BatteryLine again.\n";
 		break;
