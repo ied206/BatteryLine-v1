@@ -47,6 +47,8 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	hWnd = FindWindowW(BL_ClassName, 0);
 	if (hWnd != NULL) // The Running Program has Found
 	{
+		BLDL_AddTrayIcon(hWnd, BL_SysTrayID_OFF, NIF_INFO, 0, L"BatteryLine OFF");
+		BLDL_DelTrayIcon(hWnd, BL_SysTrayID_OFF);
 		SendMessageW(hWnd, WM_CLOSE, 0, 0); // Close that Program
 		return 0;
 	}
@@ -119,7 +121,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 				#ifdef _DEBUG_CONSOLE
 				puts("  ID_ABOUT");;
 				#endif // _DEBUG_CONSOLE
-				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d (%dbit)\nVisit https://joveler.kr/BatteryLine\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDate());
+				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d RC1(%dbit)\nVisit https://joveler.kr/BatteryLine\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDate());
 				MessageBoxW(hWnd, msgbox, L"BatteryLine", MB_ICONINFORMATION | MB_OK );
 				break;
 			case ID_SETTING:

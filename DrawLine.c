@@ -285,8 +285,6 @@ void BLCB_WM_POWERBROADCAST(HWND hWnd)
 void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit)
 {
 	BLDL_DelTrayIcon(hWnd, BL_SysTrayID_ON);
-	// BLDL_AddTrayIcon(hWnd, BL_SysTrayID_OFF, NIF_INFO, 0, L"BatteryLine OFF");
-	// BLDL_DelTrayIcon(hWnd, BL_SysTrayID_OFF);
 
 	UnregisterPowerSettingNotification(not_bat_per);
 	UnregisterPowerSettingNotification(not_power_src);
@@ -330,7 +328,7 @@ BOOL BLDL_ShowPopupMenu( HWND hWnd, POINT *curpos, int wDefaultItem )
 	if (!curpos)
 	{
 		GetCursorPos(&pt);
-		curpos =&pt;
+		curpos = &pt;
 	}
 
 	WORD cmd = TrackPopupMenu(hPopMenu, TPM_LEFTALIGN | TPM_RIGHTBUTTON | TPM_RETURNCMD | TPM_NONOTIFY, curpos->x, curpos->y, 0,hWnd, NULL);
