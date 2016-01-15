@@ -1,0 +1,81 @@
+# depslib dependency file v1.0
+1443240218 source:d:\jang\build\source\c\batterystr\main.c
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<windows.h>
+
+1452776974 source:d:\jang\build\source\c\batteryline\batstat.c
+	"Var.h"
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<windows.h>
+	<shlwapi.h>
+	<strsafe.h>
+	"BatStat.h"
+	"ErrorHandle.h"
+	"BasicIO.h"
+
+1452709562 d:\jang\build\source\c\batteryline\batstat.h
+
+1452762722 d:\jang\build\source\c\batteryline\errorhandle.h
+	<stdint.h>
+
+1452763468 d:\jang\build\source\c\batteryline\var.h
+	<windows.h>
+	<stdint.h>
+
+1452778757 source:d:\jang\build\source\c\batteryline\drawline.c
+	"Var.h"
+	"rc\resource.h"
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<windows.h>
+	<shellapi.h>
+	<strsafe.h>
+	<commctrl.h>
+	"DrawLine.h"
+	"BatStat.h"
+	"ErrorHandle.h"
+
+1452762753 source:d:\jang\build\source\c\batteryline\errorhandle.c
+	"Var.h"
+	<stdio.h>
+	<stdlib.h>
+	<windows.h>
+	<strsafe.h>
+	"ErrorHandle.h"
+
+1452779713 source:d:\jang\build\source\c\batteryline\main.c
+	"Var.h"
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<windows.h>
+	<strsafe.h>
+	"BasicIO.h"
+	"BatStat.h"
+	"ErrorHandle.h"
+	"DrawLine.h"
+
+1452708975 d:\jang\build\source\c\batteryline\drawline.h
+
+1443357815 d:\jang\build\source\c\batteryline\rc\resource.h
+
+1443357815 source:d:\jang\build\source\c\batteryline\rc\batteryline.rc
+	<windows.h>
+	<commctrl.h>
+	<richedit.h>
+	"resource.h"
+
+1452763671 source:d:\jang\build\source\c\batteryline\basicio.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"BasicIO.h"
+	<windows.h>
+
+1452763704 d:\jang\build\source\c\batteryline\basicio.h
+
