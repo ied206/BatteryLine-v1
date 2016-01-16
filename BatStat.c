@@ -321,12 +321,6 @@ int BLBS_ReadSetting()
 						if (!(dword <= g_nMon)) //
 							JV_ErrorHandle(JVERR_OPT_INI_NOT_EXIST_MONITOR, FALSE);
 
-						/*
-						if (g_nPriMon + 1 == dword)
-							option.monitor = BL_MON_PRIMARY;
-						else
-							option.monitor = (uint8_t) dword;
-						*/
 						option.monitor = (uint8_t) dword;
 					}
 					valid.monitor = TRUE;

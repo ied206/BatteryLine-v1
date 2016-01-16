@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <windows.h>
-#undef __CRT__NO_INLINE
+#undef __CRT__NO_INLINE // without this, in Debug mode, produces a lot of warnings
 #include <strsafe.h>
 #define __CRT__NO_INLINE
+#include <commctrl.h>
 
 #include "BasicIO.h"
 #include "BatStat.h"
@@ -59,7 +60,7 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	// Destroy Window
-	BLCB_WM_CLOSE(hWnd, FALSE);
+	// BLCB_WM_CLOSE(hWnd, FALSE);
 
 	return Msg.wParam;
 }
@@ -68,14 +69,13 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	wchar_t msgbox[BL_MSGBOX_BUF_SIZE];
 
-    switch(Msg)
+    switch (Msg)
     {
 	case WM_CREATE:
 		#ifdef _DEBUG_CONSOLE
 		puts("WM_CREATE");
 		#endif // _DEBUG_CONSOLE
 		BLDL_AddTrayIcon(hWnd, BL_SysTrayID_ON, NIF_MESSAGE | NIF_TIP | NIF_INFO, WM_APP_SYSTRAY_POPUP, L"BatteryLine On");
-		// BLDL_AddTrayIcon(hWnd, BL_SysTrayID_ON, NIF_MESSAGE | NIF_TIP | NIF_INFO, WM_APP_SYSTRAY_POPUP, NULL);
 		break;
     case WM_PAINT: // 0x000F
     	#ifdef _DEBUG_CONSOLE
@@ -86,40 +86,42 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	// http://everything2.com/title/Win32%2520system%2520tray%2520icon
 	case WM_APP_SYSTRAY_POPUP: // systray msg callback
 		#ifdef _DEBUG_CONSOLE
-		puts("WM_APP_SYSTRAY_POPUP");;
+		puts("WM_APP_SYSTRAY_POPUP");
 		#endif // _DEBUG_CONSOLE
         switch (lParam)
         {
-            case WM_LBUTTONDBLCLK:
-            	#ifdef _DEBUG_CONSOLE
-				puts("  WM_LBUTTONDBLCLK");;
-				#endif // _DEBUG_CONSOLE
-				SendMessage(hWnd, WM_COMMAND, ID_ABOUT, 0);
-				break;
-			case WM_RBUTTONUP:
-				#ifdef _DEBUG_CONSOLE
-				puts("  WM_RBUTTONUP");;
-				#endif // _DEBUG_CONSOLE
-				SetForegroundWindow(hWnd);
-				BLDL_ShowPopupMenu(hWnd, NULL, -1 );
-				PostMessage(hWnd, WM_APP_SYSTRAY_POPUP, 0, 0);
-				break;
+		case WM_LBUTTONDBLCLK:
+			#ifdef _DEBUG_CONSOLE
+			puts("  WM_LBUTTONDBLCLK");
+			#endif // _DEBUG_CONSOLE
+			SendMessage(hWnd, WM_COMMAND, ID_ABOUT, 0);
+			break;
+		case WM_RBUTTONUP:
+			#ifdef _DEBUG_CONSOLE
+			puts("  WM_RBUTTONUP");
+			#endif // _DEBUG_CONSOLE
+			SetForegroundWindow(hWnd);
+			BLDL_ShowPopupMenu(hWnd, NULL, -1 );
+			PostMessage(hWnd, WM_APP_SYSTRAY_POPUP, 0, 0);
+			break;
         }
+        break;
 	case WM_COMMAND: // systray msg callback
 		#ifdef _DEBUG_CONSOLE
-		puts("WM_COMMAND");;
+		puts("WM_COMMAND");
 		#endif // _DEBUG_CONSOLE
         switch (LOWORD(wParam))
         {
             case ID_ABOUT:
 				#ifdef _DEBUG_CONSOLE
-				puts("  ID_ABOUT");;
+				puts("  ID_ABOUT");
 				#endif // _DEBUG_CONSOLE
-				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d RC1(%dbit)\nVisit https://joveler.kr/BatteryLine\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDate());
-				MessageBoxW(hWnd, msgbox, L"BatteryLine", MB_ICONINFORMATION | MB_OK );
+				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d RC2 (%dbit)\nVisit https://joveler.kr/BatteryLine\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDate());
+				MessageBoxW(hWnd, msgbox, L"BatteryLine", MB_ICONINFORMATION | MB_OK);
 				break;
 			case ID_SETTING:
-				MessageBoxW(hWnd, L"Edit BatteryLine.ini for detailed options.\nGUI will be provided later.\n", L"BatteryLine", MB_ICONINFORMATION | MB_OK );
+				if (MessageBoxW(hWnd, L"Edit BatteryLine.ini and run BatteryLine again.\n", L"BatteryLine", MB_ICONINFORMATION | MB_OKCANCEL) == IDOK)
+					BLCB_OpenSettingIni(hWnd);
 				break;
 			case ID_POWERINFO:
 				BLBS_GetBatteryStat();
@@ -169,5 +171,6 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProc(hWnd, Msg, wParam, lParam);
 		break;
     }
-    return DefWindowProc(hWnd, Msg, wParam, lParam);
+
+    return 0;
 }

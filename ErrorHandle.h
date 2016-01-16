@@ -1,8 +1,6 @@
 #ifndef ERRORHANDLE_H_INCLUDED
 #define ERRORHANDLE_H_INCLUDED
 
-#include <stdint.h>
-
 #define WARNBASE	16000
 
 // ErrorMessage
@@ -57,6 +55,5 @@
 
 void JV_ErrorHandle(int code, int iswinapi);
 void JV_WarnHandle(int code, int iswinapi);
-void BinaryDump(const uint8_t buf[], const uint32_t bufsize);
 
 #endif // ERRORHANDLE_H_INCLUDED

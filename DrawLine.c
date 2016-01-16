@@ -328,7 +328,7 @@ void BLCB_WM_PAINT(HWND hWnd)
 		for (uint32_t i = 0; i < BL_COLOR_LEVEL; i++)
 		{
 			if (!(option.threshold[2*i] == 0 && option.threshold[2*i+1] == 0)  // 0,0 -> blank
-				&& option.threshold[2*i] <= stat.BatteryLifePercent && stat.BatteryLifePercent <= option.threshold[2*i+1])// Ex 20 <= '45' <= 50
+				&& option.threshold[2*i] <= stat.BatteryLifePercent && stat.BatteryLifePercent <= option.threshold[2*i+1]) // Ex 20 <= '45' <= 50
 				color_idx = i;
 		}
 
@@ -372,6 +372,33 @@ void BLCB_SetWindowPos(HWND hWnd)
 	}
 }
 
+void BLCB_OpenSettingIni(HWND hWnd)
+{
+	wchar_t* path_buf = NULL;
+	uint32_t path_size = 0;
+
+	// Get current directory's string length
+    path_size = GetCurrentDirectoryW(path_size, path_buf);
+	if (path_size == 0)
+		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
+
+	// Allocate file_buf to write absolute path
+	path_size = path_size + wcslen(BL_SettingFile) + 8;
+	path_buf = (PWSTR) malloc(sizeof(wchar_t) * path_size); // 8 for \\ and NULL
+	if (0 == GetCurrentDirectoryW(path_size, path_buf)) // Error!
+	{
+		free(path_buf);
+		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
+	}
+
+	StringCchCatW(path_buf, path_size, L"\\");
+	StringCchCatW(path_buf, path_size, BL_SettingFile);
+
+	// Open BatteryLine.ini
+	ShellExecuteW(hWnd, L"open", path_buf, NULL, NULL, SW_SHOW);
+
+	free(path_buf);
+}
 
 void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit)
 {
@@ -384,6 +411,7 @@ void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit)
 		PostQuitMessage(WM_QUIT);
 }
 
+// It is assumed that g_monInfo, g_nMon is set to 0 before calling EnumDisplayMonitors
 BOOL CALLBACK BLCB_MonEnumProc_Count(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
 {
 	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
@@ -394,7 +422,7 @@ BOOL CALLBACK BLCB_MonEnumProc_Count(HMONITOR hMonitor, HDC hdcMonitor, LPRECT l
 
 // It is assumed that g_monInfo, g_nMon is set to 0 before calling EnumDisplayMonitors
 // _GetRes is faster, but cannot know which monitor is primary monitor
-// _GetFullInfo takes a little more time, but it can know which monitor is primary monitor
+// _GetFullInfo takes a little more time, but it can know which monitor is primary monitor and taskbar position
 BOOL CALLBACK BLCB_MonEnumProc_GetRes(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
 {
 	// It is assumed that g_monInfo is init to 0 using ZeroMemory before calling EnumDisplayMonitors
@@ -425,7 +453,7 @@ BOOL CALLBACK BLCB_MonEnumProc_GetRes(HMONITOR hMonitor, HDC hdcMonitor, LPRECT 
 
 // It is assumed that g_monInfo, g_nMon is set to 0 before calling EnumDisplayMonitors
 // _GetRes is faster, but cannot know which monitor is primary monitor
-// _GetFullInfo takes a little more time, but it can know which monitor is primary monitor
+// _GetFullInfo takes a little more time, but it can know which monitor is primary monitor and taskbar position
 BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
 {
 	// It is assumed that g_monInfo is init to 0 using ZeroMemory before calling EnumDisplayMonitors
@@ -456,10 +484,10 @@ BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LP
 	return TRUE;
 }
 
-// Right click BatteryLine icon in Notification area
+// Right click BatteryLine icon in Notification Area
 BOOL BLDL_ShowPopupMenu( HWND hWnd, POINT *curpos, int wDefaultItem )
 {
-	// Add menuitems
+	// Add Menu Items
 	HMENU hPopMenu = CreatePopupMenu();
 	InsertMenuW(hPopMenu, 0, MF_BYPOSITION | MF_STRING, ID_ABOUT, L"About");
 	InsertMenuW(hPopMenu, 1, MF_BYPOSITION | MF_STRING, ID_SETTING, L"Setting");
@@ -470,8 +498,7 @@ BOOL BLDL_ShowPopupMenu( HWND hWnd, POINT *curpos, int wDefaultItem )
 	SetFocus(hWnd);
 	SendMessage(hWnd, WM_INITMENUPOPUP, (WPARAM)hPopMenu, 0);
 
-	// SHOW POPUPMENU
-	// GET CURSOR POSITION TO CREATE POPUP THERE
+	// Show Popup Menu
 	POINT pt;
 	if (!curpos)
 	{
@@ -504,6 +531,7 @@ void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR
 #else
 	nid.hIcon 		= (HICON) LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 #endif
+#undef _MSC_VER
 	StringCchCopyW(nid.szTip, ARRAYSIZE(nid.szTip), BL_SysTrayTip);
 	StringCchCopyW(nid.szInfo, ARRAYSIZE(nid.szInfo), lpInfoStr);
 	nid.uVersion 	= NOTIFYICON_VERSION_4;

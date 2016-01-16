@@ -16,7 +16,7 @@
 #ifdef _DEBUG
 	#define _DEBUG_CONSOLE
 	//#define _DEBUG_PARSING
-	#define _DEBUG_MONITOR
+	//#define _DEBUG_MONITOR
 #endif
 
 #define TRUE	1

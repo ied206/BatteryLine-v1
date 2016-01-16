@@ -5,9 +5,11 @@
 #pragma warning(disable:4996)
 #endif // _MSC_VER
 
+#include <stdint.h>
 
 int scanfile (const char name[]); // 파일의 존재 여부 검사
 int WhatBitOS (int print); // 몇비트 컴파일인가 알아내기
+void BinaryDump(const uint8_t buf[], const uint32_t bufsize);
 int CompileYear ();
 int CompileMonth ();
 int CompileDate ();

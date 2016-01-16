@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+
 #include "BasicIO.h"
-#include <windows.h>
 
 int scanfile (const char name[]) // 파일의 존재 여부 검사
 {
@@ -46,6 +47,66 @@ int WhatBitOS (int print) // 몇비트 컴파일인가 알아내기
         else
             return (sizeof(int*) * 8);
     }
+}
+
+// Linux-Style Hex Dump
+void BinaryDump(const uint8_t buf[], const uint32_t bufsize)
+{
+	uint32_t base = 0;
+	uint32_t interval = 16;
+	while (base < bufsize)
+	{
+		if (base + 16 < bufsize)
+			interval = 16;
+		else
+			interval = bufsize - base;
+
+		printf("0x%04x:   ", base);
+		for (uint32_t i = base; i < base + 16; i++) // i for dump
+		{
+			if (i < base + interval)
+				printf("%02x", buf[i]);
+			else
+			{
+				putchar(' ');
+				putchar(' ');
+			}
+
+			if ((i+1) % 2 == 0)
+				putchar(' ');
+			if ((i+1) % 8 == 0)
+				putchar(' ');
+		}
+		putchar(' ');
+		putchar(' ');
+		for (uint32_t i = base; i < base + 16; i++) // i for dump
+		{
+			if (i < base + interval)
+			{
+				if (0x20 <= buf[i] && buf[i] <= 0x7E)
+					printf("%c", buf[i]);
+				else
+					putchar('.');
+			}
+			else
+			{
+				putchar(' ');
+				putchar(' ');
+			}
+
+			if ((i+1) % 8 == 0)
+				putchar(' ');
+		}
+		putchar('\n');
+
+
+		if (base + 16 < bufsize)
+			base += 16;
+		else
+			base = bufsize;
+	}
+
+	return;
 }
 
 int CompileYear () // 컴파일한 년도
