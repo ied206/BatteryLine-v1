@@ -145,6 +145,36 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 		printf("Base Coordinate   : (%d, %d)\n", base_x, base_y);
 		putchar('\n');
 		#endif // _DEBUG_MONITOR
+
+		// Calculate where taskbar is, using rcWork and rcMonitor's relation.
+		if (g_monInfo[option.monitor-1].rcMonitor.top != g_monInfo[option.monitor-1].rcWork.top)
+		{ // TaskBar is on TOP
+			trayPos.top 	= g_monInfo[option.monitor-1].rcMonitor.top;
+			trayPos.bottom 	= g_monInfo[option.monitor-1].rcWork.top;
+			trayPos.left 	= g_monInfo[option.monitor-1].rcMonitor.left;
+			trayPos.right 	= g_monInfo[option.monitor-1].rcMonitor.right;
+		}
+		else if (g_monInfo[option.monitor-1].rcMonitor.bottom != g_monInfo[option.monitor-1].rcWork.bottom)
+		{ // TaskBar is on BOTTOM
+			trayPos.top 	= g_monInfo[option.monitor-1].rcWork.bottom;
+			trayPos.bottom 	= g_monInfo[option.monitor-1].rcMonitor.bottom;
+			trayPos.left 	= g_monInfo[option.monitor-1].rcMonitor.left;
+			trayPos.right 	= g_monInfo[option.monitor-1].rcMonitor.right;
+		}
+		else if (g_monInfo[option.monitor-1].rcMonitor.left != g_monInfo[option.monitor-1].rcWork.left)
+		{ // TaskBar is on LEFT
+			trayPos.top 	= g_monInfo[option.monitor-1].rcMonitor.top;
+			trayPos.bottom 	= g_monInfo[option.monitor-1].rcMonitor.bottom;
+			trayPos.left 	= g_monInfo[option.monitor-1].rcMonitor.left;
+			trayPos.right 	= g_monInfo[option.monitor-1].rcWork.left;
+		}
+		else if (g_monInfo[option.monitor-1].rcMonitor.right != g_monInfo[option.monitor-1].rcWork.right)
+		{ // TaskBar is on RIGHT
+			trayPos.top 	= g_monInfo[option.monitor-1].rcMonitor.top;
+			trayPos.bottom 	= g_monInfo[option.monitor-1].rcMonitor.bottom;
+			trayPos.left 	= g_monInfo[option.monitor-1].rcWork.right;
+			trayPos.right 	= g_monInfo[option.monitor-1].rcMonitor.left;
+		}
 	}
 
 	if (scr_x == 0 || scr_y == 0)
@@ -161,7 +191,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			scr_batPer = ((scr_x * stat->BatteryLifePercent) / 100);
 
 		// Only for primary monitor. Evade taskbar logic.
-		if (option.chargecolor == BL_MON_PRIMARY && option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
+		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
 			&& trayPos.top == 0 && trayPos.left == 0 && trayPos.right == scr_x) // TaskBar is on TOP - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
@@ -183,7 +213,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			scr_batPer = scr_x * stat->BatteryLifePercent / 100;
 
 		// Only for primary monitor. Evade taskbar logic.
-		if (option.chargecolor == BL_MON_PRIMARY && option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
+		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
 			&& trayPos.left == 0 && trayPos.right == scr_x && trayPos.bottom == scr_y) // TaskBar is on BOTTOM - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
@@ -205,7 +235,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			scr_batPer = scr_y * stat->BatteryLifePercent / 100;
 
 		// Only for primary monitor. Evade taskbar logic.
-		if (option.chargecolor == BL_MON_PRIMARY && option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
+		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
 			&& trayPos.top == 0 && trayPos.left == 0 && trayPos.bottom == scr_y) // TaskBar is on LEFT - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
@@ -227,7 +257,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			scr_batPer = scr_y * stat->BatteryLifePercent / 100;
 
 		// Only for primary monitor. Evade taskbar logic.
-		if (option.chargecolor == BL_MON_PRIMARY && option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
+		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
 			&& trayPos.top == 0 && trayPos.right == scr_x && trayPos.bottom == scr_y) // TaskBar is on RIGHT - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
@@ -391,10 +421,12 @@ BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LP
 
 	#ifdef _DEBUG_MONITOR
 	printf("[Monitor %d]\n", g_nMon);
-	printf("res_x        : %ld\n", g_monInfo[g_nMon].rcMonitor.right - g_monInfo[g_nMon].rcMonitor.left);
-	printf("res_y        : %ld\n", g_monInfo[g_nMon].rcMonitor.bottom - g_monInfo[g_nMon].rcMonitor.top);
-	printf("left-top     : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.left, g_monInfo[g_nMon].rcMonitor.top);
-	printf("right-bottom : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.right, g_monInfo[g_nMon].rcMonitor.bottom);
+	printf("res_x            : %ld\n", g_monInfo[g_nMon].rcMonitor.right - g_monInfo[g_nMon].rcMonitor.left);
+	printf("res_y            : %ld\n", g_monInfo[g_nMon].rcMonitor.bottom - g_monInfo[g_nMon].rcMonitor.top);
+	printf("left-top         : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.left, g_monInfo[g_nMon].rcMonitor.top);
+	printf("right-bottom     : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.right, g_monInfo[g_nMon].rcMonitor.bottom);
+	printf("left-top     (W) : (%ld, %ld)\n", g_monInfo[g_nMon].rcWork.left, g_monInfo[g_nMon].rcWork.top);
+	printf("right-bottom (W) : (%ld, %ld)\n", g_monInfo[g_nMon].rcWork.right, g_monInfo[g_nMon].rcWork.bottom);
 	printf("primary      : %d\n", (g_monInfo[g_nMon].dwFlags == MONITORINFOF_PRIMARY) ? TRUE : FALSE);
 	putchar('\n');
 	#endif
@@ -408,8 +440,7 @@ BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LP
 // Right click BatteryLine icon in Notification area
 BOOL BLDL_ShowPopupMenu( HWND hWnd, POINT *curpos, int wDefaultItem )
 {
-
-	//ADD MENUITEMS
+	// Add menuitems
 	HMENU hPopMenu = CreatePopupMenu();
 	InsertMenuW(hPopMenu, 0, MF_BYPOSITION | MF_STRING, ID_ABOUT, L"About");
 	InsertMenuW(hPopMenu, 1, MF_BYPOSITION | MF_STRING, ID_SETTING, L"Setting");
