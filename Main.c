@@ -20,6 +20,7 @@ SYSTEM_POWER_STATUS stat;
 BL_OPTION option;
 HINSTANCE g_hInst;
 int g_nMon; // Number of monitors installed on this system
+int g_nPriMon;
 BL_MONINFO g_monRes[BL_MAX_MONITOR];
 MONITORINFO g_monInfo[BL_MAX_MONITOR];
 

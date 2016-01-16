@@ -23,10 +23,13 @@ wchar_t* BL_DefaultSettingStr = L"# Joveler's BatteryLine v1.0\r\n\r\n"
 								"# showcharge   : Show BatteryLine when charging\r\n"
 								"#                  {true, false}\r\n"
 								"# monitor      : Which monitor to view BatteryLine?\r\n"
-								"#                Note : Experimental option. May contatin bugs\r\n"
-								"#                  {primary, 1, 2, ... , 255}\r\n"
+								"#                Note : Experimental option, May contatin bugs\r\n"
+								"#                  {primary, 1, 2, ... , 32}\r\n"
 								"#                  primary for using primary monitor\r\n"
 								"#                  number for n'th monitor\r\n"
+								"#                   (Number can point all monitors, primary and non-primary)\r\n"
+								"#                   (Monitor number is relative, it is prone to change)\r\n"
+								"#                   (Strongly recommend to use default \'primary\' option)\r\n"
 								"# position     : BatteryLine's position\r\n"
 								"#                  {top, bottom, left, right}\r\n"
 								"# taskbar      : Move BatteryLine when meet with taskbar\r\n"
@@ -49,7 +52,7 @@ wchar_t* BL_DefaultSettingStr = L"# Joveler's BatteryLine v1.0\r\n\r\n"
 								"# Format : {R, G, B}\r\n"
 								"defaultcolor = 0, 255, 0\r\n"
 								"chargecolor  = 0, 200, 255\r\n"
-								"fullcolor    = 0, 255, 255\r\n"
+								"fullcolor    = 0, 162, 232\r\n"
 								"# Support up to 16 thresholds\r\n"
 								"# Format : {LowEdge, HighEdge, R, G, B}\r\n"
 								"color = 0, 20, 237, 28, 36\r\n"
@@ -296,24 +299,34 @@ int BLBS_ReadSetting()
 					valid.showcharge = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"monitor") == 0)
-				{ // {primary, 1, 2, ... , 255}
+				{ // {primary, 1, 2, ... , 32}
 					if (StrCmpIW(equal_right, L"primary") == 0)
 						option.monitor = BL_MON_PRIMARY;
 					else
 					{
 						int32_t dword = _wtoi(equal_right);
-						g_nMon = 0;
+
 						// Count Monitor's number and write to g_nMon
-						EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_Count, 0);
+						g_nMon = 0;
+						g_nPriMon = 0;
+						ZeroMemory(&g_monInfo, sizeof(MONITORINFO) * BL_MAX_MONITOR);
+						EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetFullInfo, 0);
 
 						#ifdef _DEBUG_MONITOR
 						printf("[Monitor]\nThis system has %d monitors.\n\n", g_nMon);
 						#endif
 
-						if (!(1 <= dword && dword <= 255))
+						if (!(1 <= dword && dword <= BL_MAX_MONITOR))
 							JV_ErrorHandle(JVERR_OPT_INI_INVALID_MONITOR, FALSE);
-						if (!(dword < g_nMon))
+						if (!(dword <= g_nMon)) //
 							JV_ErrorHandle(JVERR_OPT_INI_NOT_EXIST_MONITOR, FALSE);
+
+						/*
+						if (g_nPriMon + 1 == dword)
+							option.monitor = BL_MON_PRIMARY;
+						else
+							option.monitor = (uint8_t) dword;
+						*/
 						option.monitor = (uint8_t) dword;
 					}
 					valid.monitor = TRUE;

@@ -109,6 +109,7 @@ extern SYSTEM_POWER_STATUS stat;
 extern BL_OPTION option;
 extern HINSTANCE g_hInst;
 extern int g_nMon; // Number of monitors installed on this system
+extern int g_nPriMon; // Which monitor is primary monitor?
 extern MONITORINFO g_monInfo[BL_MAX_MONITOR];
 extern BL_MONINFO g_monRes[BL_MAX_MONITOR];
 // http://www.transmissionzero.co.uk/computing/win32-apps-with-mingw/

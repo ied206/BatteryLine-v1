@@ -110,7 +110,7 @@ void JV_ErrorHandle(int code, int iswinapi)
 	case JVERR_OPT_INI_NOT_EXIST_MONITOR:
 		msg =	"ErrorMessage : JVERR_OPT_INI_NOT_EXIST_MONITOR\n"
 				"\'monitor\' option in BetteryLine.ini points to monitor do not exists.\n"
-				"Recommend to set \'monitor\' option to \'primary\'.\n";
+				"Set \'monitor\' option to \'primary\' and run BatteryLine again.\n";
 		break;
 	case JVERR_OPT_INI_INVALID_POSITION:
 		msg =	"ErrorMessage : JVERR_OPT_INI_INVALID_POSITION\n"

@@ -121,22 +121,30 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 	{
 		g_nMon = 0;
 		ZeroMemory(&g_monInfo, sizeof(MONITORINFO) * BL_MAX_MONITOR);
-		EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetRes, 0);
-		// EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetFullInfo, 0);
+		// EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetRes, 0);
+		EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetFullInfo, 0);
 
 		// option.monitor is pointing non-exsit monitor
-		if (!(option.monitor < g_nMon))
+		if (!(option.monitor <= g_nMon))
 		{
 			option.monitor = BL_MON_PRIMARY;
             JV_WarnHandle(JVWARN_OPT_INVALID_MONITOR, FALSE);
 		}
 
 		// Get this monitor's screen resolution
-		scr_x = g_monInfo[option.monitor].rcMonitor.right - g_monInfo[option.monitor].rcMonitor.left;
-		scr_y = g_monInfo[option.monitor].rcMonitor.bottom - g_monInfo[option.monitor].rcMonitor.top;
+		scr_x = g_monInfo[option.monitor-1].rcMonitor.right - g_monInfo[option.monitor-1].rcMonitor.left;
+		scr_y = g_monInfo[option.monitor-1].rcMonitor.bottom - g_monInfo[option.monitor-1].rcMonitor.top;
 		// Non-primary monitor's virtual coordinate can be negative value
-		base_x = g_monInfo[option.monitor].rcMonitor.left;
-		base_y = g_monInfo[option.monitor].rcMonitor.right;
+		base_x = g_monInfo[option.monitor-1].rcMonitor.left;
+		base_y = g_monInfo[option.monitor-1].rcMonitor.top;
+
+		#ifdef _DEBUG_MONITOR
+		puts("[LineDisplay]");
+		printf("Displaying on monitor %d\n", option.monitor - 1);
+		printf("Screen Resolution : (%d, %d)\n", scr_x, scr_y);
+		printf("Base Coordinate   : (%d, %d)\n", base_x, base_y);
+		putchar('\n');
+		#endif // _DEBUG_MONITOR
 	}
 
 	if (scr_x == 0 || scr_y == 0)
@@ -323,13 +331,8 @@ void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit)
 	UnregisterPowerSettingNotification(not_bat_per);
 	UnregisterPowerSettingNotification(not_power_src);
 
-	/*
-	if (g_monRes != NULL)
-		free(g_monRes);
-		*/
-
 	if (postquit)
-		PostQuitMessage(WM_QUIT); // 원래는 WM_QUIT가 들어 있었다?
+		PostQuitMessage(WM_QUIT);
 }
 
 BOOL CALLBACK BLCB_MonEnumProc_Count(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
@@ -340,10 +343,13 @@ BOOL CALLBACK BLCB_MonEnumProc_Count(HMONITOR hMonitor, HDC hdcMonitor, LPRECT l
 	return TRUE;
 }
 
+// It is assumed that g_monInfo, g_nMon is set to 0 before calling EnumDisplayMonitors
+// _GetRes is faster, but cannot know which monitor is primary monitor
+// _GetFullInfo takes a little more time, but it can know which monitor is primary monitor
 BOOL CALLBACK BLCB_MonEnumProc_GetRes(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
 {
 	// It is assumed that g_monInfo is init to 0 using ZeroMemory before calling EnumDisplayMonitors
-	// ZeroMemory(&g_monInfo, sizeof(BL_MONINFO) * BL_MAX_MONITOR);
+	// ZeroMemory(&g_monInfo, sizeof(MONITORINFO) * BL_MAX_MONITOR);
 
 	// lprcMonitor holds this monitor's virtual-screen coordinates
 	g_monInfo[g_nMon].rcMonitor.top 	= lprcMonitor->top;
@@ -362,18 +368,26 @@ BOOL CALLBACK BLCB_MonEnumProc_GetRes(HMONITOR hMonitor, HDC hdcMonitor, LPRECT 
 
 	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
 	g_nMon++;
+	// _GetRes can not inspect which monitor, so set it to -1
+	g_nPriMon = -1;
 
 	return TRUE;
 }
 
+// It is assumed that g_monInfo, g_nMon is set to 0 before calling EnumDisplayMonitors
+// _GetRes is faster, but cannot know which monitor is primary monitor
+// _GetFullInfo takes a little more time, but it can know which monitor is primary monitor
 BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
 {
 	// It is assumed that g_monInfo is init to 0 using ZeroMemory before calling EnumDisplayMonitors
-	// ZeroMemory(&g_monInfo, sizeof(MONITORINFOEXW) * BL_MAX_MONITOR);
+	// ZeroMemory(&g_monInfo, sizeof(MONITORINFO) * BL_MAX_MONITOR);
 
 	// Get monitor info
     g_monInfo[g_nMon].cbSize = sizeof(MONITORINFO);
     GetMonitorInfoW(hMonitor, &g_monInfo[g_nMon]);
+
+    if (g_monInfo[g_nMon].dwFlags == MONITORINFOF_PRIMARY)
+		g_nPriMon = g_nMon;
 
 	#ifdef _DEBUG_MONITOR
 	printf("[Monitor %d]\n", g_nMon);
@@ -381,6 +395,7 @@ BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LP
 	printf("res_y        : %ld\n", g_monInfo[g_nMon].rcMonitor.bottom - g_monInfo[g_nMon].rcMonitor.top);
 	printf("left-top     : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.left, g_monInfo[g_nMon].rcMonitor.top);
 	printf("right-bottom : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.right, g_monInfo[g_nMon].rcMonitor.bottom);
+	printf("primary      : %d\n", (g_monInfo[g_nMon].dwFlags == MONITORINFOF_PRIMARY) ? TRUE : FALSE);
 	putchar('\n');
 	#endif
 
