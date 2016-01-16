@@ -46,6 +46,11 @@
 #define BL_TASKBAR_IGNORE	0
 #define BL_TASKBAR_EVADE	1
 
+#define BL_TASKBAR_TOP		1
+#define BL_TASKBAR_BOTTOM	2
+#define BL_TASKBAR_LEFT		3
+#define BL_TASKBAR_RIGHT	4
+
 // BS for Battery Status
 #define BS_TOKEN_BUF_SIZE	16
 #define BS_LINE_BUF_SIZE	512

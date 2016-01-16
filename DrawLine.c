@@ -99,14 +99,8 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 	int32_t base_x = 0, base_y = 0; // base virtual coord of monitor
 	int32_t scr_win_x = 0, scr_win_y = 0;
 	int32_t scr_batPer = 0;
-	HWND hTray = NULL;
+	uint32_t taskbar = 0;
 	RECT trayPos;
-
-	hTray = FindWindowW(L"Shell_TrayWnd", NULL);
-	if (hTray == NULL)
-		JV_ErrorHandle(JVERR_FindWindow, TRUE);
-	if (GetWindowRect(hTray, &trayPos) == 0)
-		JV_ErrorHandle(JVERR_GetWindowRect, TRUE);
 
 	if (option.monitor == BL_MON_PRIMARY) // Draw to primary monitor
 	{
@@ -116,8 +110,27 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 		// Primary monitor's virtual coordinate is always (0,0)
 		base_x = 0;
 		base_y = 0;
+
+		HWND hTray = FindWindowW(L"Shell_TrayWnd", NULL);
+		if (hTray == NULL)
+			JV_ErrorHandle(JVERR_FindWindow, TRUE);
+		if (GetWindowRect(hTray, &trayPos) == 0)
+			JV_ErrorHandle(JVERR_GetWindowRect, TRUE);
+
+		// Calculate where taskbar is, using rcWork and rcMonitor's relation.
+		if (trayPos.top == 0 && trayPos.left == 0 && trayPos.right == scr_x)
+			taskbar = BL_TASKBAR_TOP;
+		else if (trayPos.left == 0 && trayPos.right == scr_x && trayPos.bottom == scr_y)
+			taskbar = BL_TASKBAR_BOTTOM;
+		else if (trayPos.top == 0 && trayPos.left == 0 && trayPos.bottom == scr_y)
+			taskbar = BL_TASKBAR_LEFT;
+		else if (trayPos.top == 0 && trayPos.right == scr_x && trayPos.bottom == scr_y)
+			taskbar = BL_TASKBAR_RIGHT;
+
+		if (scr_x == 0 || scr_y == 0)
+			JV_ErrorHandle(JVERR_GetSystemMetrics, FALSE);
 	}
-	else // It goes complex in context of multiple monitor...
+	else // Draw to n'th monitor
 	{
 		g_nMon = 0;
 		ZeroMemory(&g_monInfo, sizeof(MONITORINFO) * BL_MAX_MONITOR);
@@ -138,47 +151,53 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 		base_x = g_monInfo[option.monitor-1].rcMonitor.left;
 		base_y = g_monInfo[option.monitor-1].rcMonitor.top;
 
-		#ifdef _DEBUG_MONITOR
-		puts("[LineDisplay]");
-		printf("Displaying on monitor %d\n", option.monitor - 1);
-		printf("Screen Resolution : (%d, %d)\n", scr_x, scr_y);
-		printf("Base Coordinate   : (%d, %d)\n", base_x, base_y);
-		putchar('\n');
-		#endif // _DEBUG_MONITOR
+
 
 		// Calculate where taskbar is, using rcWork and rcMonitor's relation.
+		// trayPos is calculated as taskbar is in PRIMARY, since coord is calculated relative to base coord of monitor.
 		if (g_monInfo[option.monitor-1].rcMonitor.top != g_monInfo[option.monitor-1].rcWork.top)
 		{ // TaskBar is on TOP
-			trayPos.top 	= g_monInfo[option.monitor-1].rcMonitor.top;
-			trayPos.bottom 	= g_monInfo[option.monitor-1].rcWork.top;
-			trayPos.left 	= g_monInfo[option.monitor-1].rcMonitor.left;
-			trayPos.right 	= g_monInfo[option.monitor-1].rcMonitor.right;
+			taskbar = BL_TASKBAR_TOP;
+			trayPos.top 	= 0;
+			trayPos.bottom 	= g_monInfo[option.monitor-1].rcWork.top - g_monInfo[option.monitor-1].rcMonitor.top;
+			trayPos.left 	= 0;
+			trayPos.right 	= scr_x;
 		}
 		else if (g_monInfo[option.monitor-1].rcMonitor.bottom != g_monInfo[option.monitor-1].rcWork.bottom)
 		{ // TaskBar is on BOTTOM
-			trayPos.top 	= g_monInfo[option.monitor-1].rcWork.bottom;
-			trayPos.bottom 	= g_monInfo[option.monitor-1].rcMonitor.bottom;
-			trayPos.left 	= g_monInfo[option.monitor-1].rcMonitor.left;
-			trayPos.right 	= g_monInfo[option.monitor-1].rcMonitor.right;
+			taskbar = BL_TASKBAR_BOTTOM;
+			trayPos.top 	= g_monInfo[option.monitor-1].rcWork.bottom - g_monInfo[option.monitor-1].rcMonitor.top;
+			trayPos.bottom 	= scr_y;
+			trayPos.left 	= 0;
+			trayPos.right 	= scr_x;
 		}
 		else if (g_monInfo[option.monitor-1].rcMonitor.left != g_monInfo[option.monitor-1].rcWork.left)
 		{ // TaskBar is on LEFT
-			trayPos.top 	= g_monInfo[option.monitor-1].rcMonitor.top;
-			trayPos.bottom 	= g_monInfo[option.monitor-1].rcMonitor.bottom;
-			trayPos.left 	= g_monInfo[option.monitor-1].rcMonitor.left;
-			trayPos.right 	= g_monInfo[option.monitor-1].rcWork.left;
+			taskbar = BL_TASKBAR_LEFT;
+			trayPos.top 	= 0;
+			trayPos.bottom 	= scr_y;
+			trayPos.left 	= 0;
+			trayPos.right 	= g_monInfo[option.monitor-1].rcWork.left - g_monInfo[option.monitor-1].rcMonitor.left;
 		}
 		else if (g_monInfo[option.monitor-1].rcMonitor.right != g_monInfo[option.monitor-1].rcWork.right)
 		{ // TaskBar is on RIGHT
-			trayPos.top 	= g_monInfo[option.monitor-1].rcMonitor.top;
-			trayPos.bottom 	= g_monInfo[option.monitor-1].rcMonitor.bottom;
-			trayPos.left 	= g_monInfo[option.monitor-1].rcWork.right;
-			trayPos.right 	= g_monInfo[option.monitor-1].rcMonitor.left;
+			taskbar = BL_TASKBAR_RIGHT;
+			trayPos.top 	= 0;
+			trayPos.bottom 	= scr_y;
+			trayPos.left 	= g_monInfo[option.monitor-1].rcWork.right - g_monInfo[option.monitor-1].rcMonitor.left;
+			trayPos.right 	= scr_x;
 		}
-	}
 
-	if (scr_x == 0 || scr_y == 0)
-		JV_ErrorHandle(JVERR_GetSystemMetrics, FALSE);
+		#ifdef _DEBUG_MONITOR
+		puts("[LineDisplay]");
+		printf("Displaying on monitor %d\n", option.monitor - 1);
+		printf("Screen Resolution      : (%d, %d)\n", scr_x, scr_y);
+		printf("Base Coordinate        : (%d, %d)\n", base_x, base_y);
+		printf("Taskbar (left,top)     : (%ld, %ld)\n", trayPos.left, trayPos.top);
+		printf("Taskbar (right,bottom) : (%ld, %ld)\n", trayPos.right, trayPos.bottom);
+		putchar('\n');
+		#endif // _DEBUG_MONITOR
+	}
 
 	// Set Position of window
 	switch (option.position)
@@ -192,7 +211,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 
 		// Only for primary monitor. Evade taskbar logic.
 		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
-			&& trayPos.top == 0 && trayPos.left == 0 && trayPos.right == scr_x) // TaskBar is on TOP - conflict
+			&& taskbar == BL_TASKBAR_TOP) // TaskBar is on TOP - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
 				scr_win_y = trayPos.bottom;
@@ -214,7 +233,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 
 		// Only for primary monitor. Evade taskbar logic.
 		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
-			&& trayPos.left == 0 && trayPos.right == scr_x && trayPos.bottom == scr_y) // TaskBar is on BOTTOM - conflict
+			&& taskbar == BL_TASKBAR_BOTTOM) // TaskBar is on BOTTOM - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
 				scr_win_y = trayPos.top - option.height;
@@ -236,7 +255,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 
 		// Only for primary monitor. Evade taskbar logic.
 		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
-			&& trayPos.top == 0 && trayPos.left == 0 && trayPos.bottom == scr_y) // TaskBar is on LEFT - conflict
+			&& taskbar == BL_TASKBAR_LEFT) // TaskBar is on LEFT - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
 				scr_win_x = trayPos.right;
@@ -258,7 +277,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 
 		// Only for primary monitor. Evade taskbar logic.
 		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
-			&& trayPos.top == 0 && trayPos.right == scr_x && trayPos.bottom == scr_y) // TaskBar is on RIGHT - conflict
+			&& taskbar == BL_TASKBAR_RIGHT) // TaskBar is on RIGHT - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
 				scr_win_x = trayPos.left - option.height;
