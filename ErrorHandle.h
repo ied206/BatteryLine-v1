@@ -2,8 +2,13 @@
 #define ERRORHANDLE_H_INCLUDED
 
 #include <stdint.h>
+
+#define WARNBASE	16000
+
 // ErrorMessage
 
+// under 100 : etc
+#define JVERR_MALLOC_FAILURE					1
 // 1xx : WinAPI Failure
 #define JVERR_GetSystemPowerStatus				100
 #define JVERR_LoadIcon							101
@@ -43,11 +48,12 @@
 // 3xx : Battery Status
 #define JVERR_ACLineStatus_UNKNOWN				300
 #define JVERR_BATTERY_NOT_EXIST					301
-// 4xx : etc
-#define JVERR_MALLOC_FAILURE					400
+
 
 // WarningMessage
-#define JVWARN_NOT_ENOUGH_ARGV			10000
+#define JVWARN_NOT_ENOUGH_ARGV			(WARNBASE + 0)
+// 2xx : Invalid option
+#define JVWARN_OPT_INVALID_MONITOR		(WARNBASE + 200)
 
 void JV_ErrorHandle(int code, int iswinapi);
 void JV_WarnHandle(int code, int iswinapi);

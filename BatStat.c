@@ -10,6 +10,7 @@
 #define __CRT__NO_INLINE
 
 #include "BatStat.h"
+#include "DrawLine.h"
 #include "ErrorHandle.h"
 #include "BasicIO.h"
 
@@ -22,7 +23,7 @@ wchar_t* BL_DefaultSettingStr = L"# Joveler's BatteryLine v1.0\r\n\r\n"
 								"# showcharge   : Show BatteryLine when charging\r\n"
 								"#                  {true, false}\r\n"
 								"# monitor      : Which monitor to view BatteryLine?\r\n"
-								"#                - Note : This option is not implemented in v1.0.\r\n"
+								"#                Note : Experimental option. May contatin bugs\r\n"
 								"#                  {primary, 1, 2, ... , 255}\r\n"
 								"#                  primary for using primary monitor\r\n"
 								"#                  number for n'th monitor\r\n"
@@ -78,8 +79,9 @@ int BLBS_ReadSetting()
 
 	StringCchCatW(path_buf, path_size, L"\\");
 	StringCchCatW(path_buf, path_size, BL_SettingFile);
+
 	#ifdef _DEBUG_CONSOLE
-	printf("[IniFile]\npath_buf    : %S\n\n", path_buf);
+	printf("[IniFile]\n%S\n\n", path_buf);
 	#endif // _DEBUG_CONSOLE
 
 	// File IO
@@ -300,6 +302,14 @@ int BLBS_ReadSetting()
 					else
 					{
 						int32_t dword = _wtoi(equal_right);
+						g_nMon = 0;
+						// Count Monitor's number and write to g_nMon
+						EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_Count, 0);
+
+						#ifdef _DEBUG_MONITOR
+						printf("[Monitor]\nThis system has %d monitors.\n\n", g_nMon);
+						#endif
+
 						if (!(1 <= dword && dword <= 255))
 							JV_ErrorHandle(JVERR_OPT_INI_INVALID_MONITOR, FALSE);
 						if (!(dword < g_nMon))

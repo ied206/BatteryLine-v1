@@ -20,7 +20,8 @@ SYSTEM_POWER_STATUS stat;
 BL_OPTION option;
 HINSTANCE g_hInst;
 int g_nMon; // Number of monitors installed on this system
-BL_MONRES* g_monres;
+BL_MONINFO g_monRes[BL_MAX_MONITOR];
+MONITORINFO g_monInfo[BL_MAX_MONITOR];
 
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -31,43 +32,35 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	HWND hWnd;
 	MSG	Msg;
 
+	ZeroMemory(&g_monInfo, sizeof(BL_MONINFO) * BL_MAX_MONITOR);
 	ZeroMemory(&option, sizeof(BL_OPTION));
 	g_hInst = hInstance;
 
-	/*
-	// Count Monitor's number and write to g_nMon
-	g_nMon = 0;
-	EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_Count, 0);
-	monres = (BL_MONRES*) malloc(sizeof(BL_MONRES) * g_nMon);
-	*/
+	// Find if BatteryLine is already running.
+	hWnd = FindWindowW(BL_ClassName, 0);
+	if (hWnd != NULL) // Running BatteryLine found? Terminate it.
+	{
+		BLDL_AddTrayIcon(hWnd, BL_SysTrayID_OFF, NIF_INFO, 0, L"BatteryLine OFF");
+		BLDL_DelTrayIcon(hWnd, BL_SysTrayID_OFF);
+		SendMessageW(hWnd, WM_CLOSE, 0, 0);
+		return 0;
+	}
 
 	// Load settings from BatteryLine.ini
 	BLBS_ReadSetting();
 
-	hWnd = FindWindowW(BL_ClassName, 0);
-	if (hWnd != NULL) // The Running Program has Found
+	// Decode and treat the messages as long as the application is running
+	hWnd = BLDL_InitWindow(hInstance);
+	while (GetMessage(&Msg, NULL, 0, 0))
 	{
-		BLDL_AddTrayIcon(hWnd, BL_SysTrayID_OFF, NIF_INFO, 0, L"BatteryLine OFF");
-		BLDL_DelTrayIcon(hWnd, BL_SysTrayID_OFF);
-		SendMessageW(hWnd, WM_CLOSE, 0, 0); // Close that Program
-		return 0;
+		TranslateMessage(&Msg);
+		DispatchMessage(&Msg);
 	}
-	else
-	{
-		hWnd = BLDL_InitWindow(hInstance);
-		// Decode and treat the messages
-		// as long as the application is running
-		while (GetMessage(&Msg, NULL, 0, 0))
-		{
-			TranslateMessage(&Msg);
-			DispatchMessage(&Msg);
-		}
 
-		// Destroy Window
-		BLCB_WM_CLOSE(hWnd, FALSE);
+	// Destroy Window
+	BLCB_WM_CLOSE(hWnd, FALSE);
 
-		return Msg.wParam;
-	}
+	return Msg.wParam;
 }
 
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
@@ -125,7 +118,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 				MessageBoxW(hWnd, msgbox, L"BatteryLine", MB_ICONINFORMATION | MB_OK );
 				break;
 			case ID_SETTING:
-				MessageBoxW(hWnd, L"Not implemented, will be implemented in future.", L"BatteryLine", MB_ICONINFORMATION | MB_OK );
+				MessageBoxW(hWnd, L"Edit BatteryLine.ini for detailed options.\nGUI will be provided later.\n", L"BatteryLine", MB_ICONINFORMATION | MB_OK );
 				break;
 			case ID_POWERINFO:
 				BLBS_GetBatteryStat();
@@ -162,14 +155,14 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		else if (Msg == WM_POWERBROADCAST)
 			puts("WM_POWERBROADCAST");
 		#endif // _DEBUG_CONSOLE
-		BLCB_WM_POWERBROADCAST(hWnd);
+		BLCB_SetWindowPos(hWnd);
 		break;
 	case WM_DISPLAYCHANGE: // Monitor is attached or detached, Screen resolution changed, etc. Check for HMONITOR is valid.
 		#ifdef _DEBUG_CONSOLE
 		puts("WM_DISPLAYCHANGE");
 		#endif // _DEBUG_CONSOLE
 		// BringWindowToTop(hWnd);
-		BLCB_WM_POWERBROADCAST(hWnd); // Redraw windows fit changed resolution
+		BLCB_SetWindowPos(hWnd); // Redraw windows fit changed resolution
 		break;
 	default:
 		return DefWindowProc(hWnd, Msg, wParam, lParam);

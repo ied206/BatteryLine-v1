@@ -95,8 +95,10 @@ HWND BLDL_InitWindow(HINSTANCE hInstance)
 
 void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 {
-	int scr_x = 0, scr_y = 0;
-	int scr_win_x = 0, scr_win_y = 0, scr_batPer = 0;
+	int32_t scr_x = 0, scr_y = 0; // full resolution of monitor
+	int32_t base_x = 0, base_y = 0; // base virtual coord of monitor
+	int32_t scr_win_x = 0, scr_win_y = 0;
+	int32_t scr_batPer = 0;
 	HWND hTray = NULL;
 	RECT trayPos;
 
@@ -106,17 +108,37 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 	if (GetWindowRect(hTray, &trayPos) == 0)
 		JV_ErrorHandle(JVERR_GetWindowRect, TRUE);
 
-//	if (option.monitor == BL_MON_PRIMARY) // Draw to primary monitor
+	if (option.monitor == BL_MON_PRIMARY) // Draw to primary monitor
 	{
+		// Get primary monitor's screen resolution
 		scr_x = GetSystemMetrics(SM_CXSCREEN);
 		scr_y = GetSystemMetrics(SM_CYSCREEN);
+		// Primary monitor's virtual coordinate is always (0,0)
+		base_x = 0;
+		base_y = 0;
 	}
-/*	else // It goes complex in context of multiple monitor...
+	else // It goes complex in context of multiple monitor...
 	{
-		// https://msdn.microsoft.com/en-us/library/windows/desktop/dd144968%28v=vs.85%29.aspx
-		EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc, 0);
+		g_nMon = 0;
+		ZeroMemory(&g_monInfo, sizeof(MONITORINFO) * BL_MAX_MONITOR);
+		EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetRes, 0);
+		// EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetFullInfo, 0);
+
+		// option.monitor is pointing non-exsit monitor
+		if (!(option.monitor < g_nMon))
+		{
+			option.monitor = BL_MON_PRIMARY;
+            JV_WarnHandle(JVWARN_OPT_INVALID_MONITOR, FALSE);
+		}
+
+		// Get this monitor's screen resolution
+		scr_x = g_monInfo[option.monitor].rcMonitor.right - g_monInfo[option.monitor].rcMonitor.left;
+		scr_y = g_monInfo[option.monitor].rcMonitor.bottom - g_monInfo[option.monitor].rcMonitor.top;
+		// Non-primary monitor's virtual coordinate can be negative value
+		base_x = g_monInfo[option.monitor].rcMonitor.left;
+		base_y = g_monInfo[option.monitor].rcMonitor.right;
 	}
-*/
+
 	if (scr_x == 0 || scr_y == 0)
 		JV_ErrorHandle(JVERR_GetSystemMetrics, FALSE);
 
@@ -124,11 +146,14 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 	switch (option.position)
 	{
 	case BL_POS_TOP:
+		// Calculate batter percent relative to screen resolution
 		if (stat->ACLineStatus == 1 && !(stat->BatteryFlag & 0x08)) // Not Charging, because battery is full
 			scr_batPer = scr_x;
 		else
-			scr_batPer = scr_x * stat->BatteryLifePercent / 100;
-		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
+			scr_batPer = ((scr_x * stat->BatteryLifePercent) / 100);
+
+		// Only for primary monitor. Evade taskbar logic.
+		if (option.chargecolor == BL_MON_PRIMARY && option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
 			&& trayPos.top == 0 && trayPos.left == 0 && trayPos.right == scr_x) // TaskBar is on TOP - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
@@ -136,18 +161,21 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			else
 				JV_ErrorHandle(JVERR_OPT_INVALID_TASKBAR, FALSE);
 		}
-		else // TaskBar is on BOTTOM | LEFT | RIGHT
+		else // TaskBar is on BOTTOM | LEFT | RIGHT, or Monitor is not primary
 			scr_win_y = 0;
 		// Draw
-		if (SetWindowPos(hWnd, HWND_TOPMOST, 0, scr_win_y, scr_batPer, option.height, 0) == 0)
+		if (SetWindowPos(hWnd, HWND_TOPMOST, base_x + 0, base_y + scr_win_y, scr_batPer, option.height, 0) == 0)
 			JV_ErrorHandle(JVERR_SetWindowPos, TRUE);
 		break;
 	case BL_POS_BOTTOM:
+		// Calculate batter percent relative to screen resolution
 		if (stat->ACLineStatus == 1 && !(stat->BatteryFlag & 0x08)) // Not Charging, because battery is full
 			scr_batPer = scr_x;
 		else
 			scr_batPer = scr_x * stat->BatteryLifePercent / 100;
-		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
+
+		// Only for primary monitor. Evade taskbar logic.
+		if (option.chargecolor == BL_MON_PRIMARY && option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
 			&& trayPos.left == 0 && trayPos.right == scr_x && trayPos.bottom == scr_y) // TaskBar is on BOTTOM - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
@@ -155,18 +183,21 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			else
 				JV_ErrorHandle(JVERR_OPT_INVALID_TASKBAR, FALSE);
 		}
-		else // TaskBar is on TOP | LEFT | RIGHT
+		else // TaskBar is on TOP | LEFT | RIGHT, or Monitor is not primary
 			scr_win_y = scr_y - option.height;
 		// Draw
-		if (SetWindowPos(hWnd, HWND_TOPMOST, 0, scr_win_y, scr_batPer, option.height, 0) == 0)
+		if (SetWindowPos(hWnd, HWND_TOPMOST, base_x + 0, base_y + scr_win_y, scr_batPer, option.height, 0) == 0)
 			JV_ErrorHandle(JVERR_SetWindowPos, TRUE);
 		break;
 	case BL_POS_LEFT:
+		// Calculate batter percent relative to screen resolution
 		if (stat->ACLineStatus == 1 && !(stat->BatteryFlag & 0x08)) // Not Charging, because battery is full
 			scr_batPer = scr_y;
 		else
 			scr_batPer = scr_y * stat->BatteryLifePercent / 100;
-		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
+
+		// Only for primary monitor. Evade taskbar logic.
+		if (option.chargecolor == BL_MON_PRIMARY && option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
 			&& trayPos.top == 0 && trayPos.left == 0 && trayPos.bottom == scr_y) // TaskBar is on LEFT - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
@@ -174,18 +205,21 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			else
 				JV_ErrorHandle(JVERR_OPT_INVALID_TASKBAR, FALSE);
 		}
-		else // TaskBar is on TOP | BOTTOM | RIGHT
+		else // TaskBar is on TOP | BOTTOM | RIGHT, or Monitor is not primary
 			scr_win_x = 0;
 		// Draw
-		if (SetWindowPos(hWnd, HWND_TOPMOST, scr_win_x, scr_y - scr_batPer, option.height, scr_batPer, 0) == 0)
+		if (SetWindowPos(hWnd, HWND_TOPMOST, base_x + scr_win_x, base_y + scr_y - scr_batPer, option.height, scr_batPer, 0) == 0)
 			JV_ErrorHandle(JVERR_SetWindowPos, TRUE);
 		break;
 	case BL_POS_RIGHT:
+		// Calculate batter percent relative to screen resolution
 		if (stat->ACLineStatus == 1 && !(stat->BatteryFlag & 0x08)) // Not Charging, because battery is full
 			scr_batPer = scr_y;
 		else
 			scr_batPer = scr_y * stat->BatteryLifePercent / 100;
-		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
+
+		// Only for primary monitor. Evade taskbar logic.
+		if (option.chargecolor == BL_MON_PRIMARY && option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
 			&& trayPos.top == 0 && trayPos.right == scr_x && trayPos.bottom == scr_y) // TaskBar is on RIGHT - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
@@ -193,10 +227,10 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			else
 				JV_ErrorHandle(JVERR_OPT_INVALID_TASKBAR, FALSE);
 		}
-		else // TaskBar is on TOP | BOTTOM | LEFT
+		else // TaskBar is on TOP | BOTTOM | LEFT, or Monitor is not primary
 			scr_win_x = scr_x - option.height;
 		// Draw
-		if (SetWindowPos(hWnd, HWND_TOPMOST, scr_win_x, scr_y - scr_batPer, option.height, scr_batPer, 0) == 0)
+		if (SetWindowPos(hWnd, HWND_TOPMOST, base_x + scr_win_x, base_y + scr_y - scr_batPer, option.height, scr_batPer, 0) == 0)
 			JV_ErrorHandle(JVERR_SetWindowPos, TRUE);
 		break;
 	default:
@@ -262,7 +296,7 @@ void BLCB_WM_PAINT(HWND hWnd)
 }
 
 // When Power Status is refreshed, this callback is called to update window's length.
-void BLCB_WM_POWERBROADCAST(HWND hWnd)
+void BLCB_SetWindowPos(HWND hWnd)
 {
 	if (!GetSystemPowerStatus(&stat))
 		JV_ErrorHandle(JVERR_GetSystemPowerStatus, TRUE);
@@ -289,23 +323,72 @@ void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit)
 	UnregisterPowerSettingNotification(not_bat_per);
 	UnregisterPowerSettingNotification(not_power_src);
 
+	/*
+	if (g_monRes != NULL)
+		free(g_monRes);
+		*/
+
 	if (postquit)
 		PostQuitMessage(WM_QUIT); // 원래는 WM_QUIT가 들어 있었다?
 }
 
-/*
 BOOL CALLBACK BLCB_MonEnumProc_Count(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
-{	//lprcMonitor holds the rectangle that describes the monitor position and resolution)
+{
+	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
 	g_nMon++;
+
 	return TRUE;
 }
 
 BOOL CALLBACK BLCB_MonEnumProc_GetRes(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
-{	//lprcMonitor holds the rectangle that describes the monitor position and resolution)
-	;
+{
+	// It is assumed that g_monInfo is init to 0 using ZeroMemory before calling EnumDisplayMonitors
+	// ZeroMemory(&g_monInfo, sizeof(BL_MONINFO) * BL_MAX_MONITOR);
+
+	// lprcMonitor holds this monitor's virtual-screen coordinates
+	g_monInfo[g_nMon].rcMonitor.top 	= lprcMonitor->top;
+	g_monInfo[g_nMon].rcMonitor.bottom 	= lprcMonitor->bottom;
+	g_monInfo[g_nMon].rcMonitor.left 	= lprcMonitor->left;
+	g_monInfo[g_nMon].rcMonitor.right 	= lprcMonitor->right;
+
+	#ifdef _DEBUG_MONITOR
+	printf("[Monitor %d]\n", g_nMon);
+	printf("res_x        : %ld\n", g_monInfo[g_nMon].rcMonitor.right - g_monInfo[g_nMon].rcMonitor.left);
+	printf("res_y        : %ld\n", g_monInfo[g_nMon].rcMonitor.bottom - g_monInfo[g_nMon].rcMonitor.top);
+	printf("left-top     : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.left, g_monInfo[g_nMon].rcMonitor.top);
+	printf("right-bottom : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.right, g_monInfo[g_nMon].rcMonitor.bottom);
+	putchar('\n');
+	#endif
+
+	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
+	g_nMon++;
+
 	return TRUE;
 }
-*/
+
+BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+{
+	// It is assumed that g_monInfo is init to 0 using ZeroMemory before calling EnumDisplayMonitors
+	// ZeroMemory(&g_monInfo, sizeof(MONITORINFOEXW) * BL_MAX_MONITOR);
+
+	// Get monitor info
+    g_monInfo[g_nMon].cbSize = sizeof(MONITORINFO);
+    GetMonitorInfoW(hMonitor, &g_monInfo[g_nMon]);
+
+	#ifdef _DEBUG_MONITOR
+	printf("[Monitor %d]\n", g_nMon);
+	printf("res_x        : %ld\n", g_monInfo[g_nMon].rcMonitor.right - g_monInfo[g_nMon].rcMonitor.left);
+	printf("res_y        : %ld\n", g_monInfo[g_nMon].rcMonitor.bottom - g_monInfo[g_nMon].rcMonitor.top);
+	printf("left-top     : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.left, g_monInfo[g_nMon].rcMonitor.top);
+	printf("right-bottom : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.right, g_monInfo[g_nMon].rcMonitor.bottom);
+	putchar('\n');
+	#endif
+
+   	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
+	g_nMon++;
+
+	return TRUE;
+}
 
 // Right click BatteryLine icon in Notification area
 BOOL BLDL_ShowPopupMenu( HWND hWnd, POINT *curpos, int wDefaultItem )

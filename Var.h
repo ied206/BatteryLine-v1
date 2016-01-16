@@ -16,6 +16,7 @@
 #ifdef _DEBUG
 	#define _DEBUG_CONSOLE
 	//#define _DEBUG_PARSING
+	#define _DEBUG_MONITOR
 #endif
 
 #define TRUE	1
@@ -35,6 +36,7 @@
 
 #define WM_APP_SYSTRAY_POPUP (WM_APP + 0x0001)
 
+#define BL_MAX_MONITOR		32
 #define BL_COLOR_LEVEL		16
 #define BL_MON_PRIMARY 		0
 #define BL_POS_TOP 			1
@@ -86,19 +88,29 @@ struct bl_option
 };
 typedef struct bl_option BL_OPTION;
 
-struct bl_monres
+struct bl_moninfo
 {
-	int scr_x;
-	int scr_y;
+	// resoultion
+	uint32_t res_x;
+	uint32_t res_y;
+	// virt coord
+	int32_t left;
+	int32_t top;
+	int32_t right;
+	int32_t bottom;
+	// Is this monitor primary?
+	// device name
+	// wchar_t name[CCHDEVICENAME];
 };
-typedef struct bl_monres BL_MONRES;
+typedef struct bl_moninfo BL_MONINFO;
 
 extern HANDLE not_power_src, not_bat_per;
 extern SYSTEM_POWER_STATUS stat;
 extern BL_OPTION option;
 extern HINSTANCE g_hInst;
 extern int g_nMon; // Number of monitors installed on this system
-extern BL_MONRES* g_monres;
+extern MONITORINFO g_monInfo[BL_MAX_MONITOR];
+extern BL_MONINFO g_monRes[BL_MAX_MONITOR];
 // http://www.transmissionzero.co.uk/computing/win32-apps-with-mingw/
 
 #endif // VAR_H_INCLUDED

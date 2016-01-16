@@ -108,8 +108,9 @@ void JV_ErrorHandle(int code, int iswinapi)
 				"Invalid Option in BetteryLine.ini. Check \'monitor\'.\n";
 		break;
 	case JVERR_OPT_INI_NOT_EXIST_MONITOR:
-		msg =	"ErrorMessage : #define JVERR_OPT_INI_NOT_EXIST_MONITOR\n"
-				"\'monitor\' option in BetteryLine.ini points to monitor not exists.\n";
+		msg =	"ErrorMessage : JVERR_OPT_INI_NOT_EXIST_MONITOR\n"
+				"\'monitor\' option in BetteryLine.ini points to monitor do not exists.\n"
+				"Recommend to set \'monitor\' option to \'primary\'.\n";
 		break;
 	case JVERR_OPT_INI_INVALID_POSITION:
 		msg =	"ErrorMessage : JVERR_OPT_INI_INVALID_POSITION\n"
@@ -197,6 +198,11 @@ void JV_WarnHandle(int code, int iswinapi)
 		msg = 	"WarnMessage : JVWARN_NOT_ENOUGH_ARGV\n"
 				"Not enough argv\n";
 		break;
+	case JVWARN_OPT_INVALID_MONITOR:
+		msg = 	"WarnMessage : JVWARN_OPT_INVALID_MONITOR\n"
+				"Specified monitor is no longer valid.\n"
+				"Fall back to PRIMARY monitor.\n";
+		break;
 	default:
 		msg = "WarnMessage : UNDEFINDED WARNING\nUndefined Warning\n";
 		break;
@@ -206,6 +212,7 @@ void JV_WarnHandle(int code, int iswinapi)
     printf("WarnCode : %d\n%s", code, msg);
     if (iswinapi)
 		printf("WinAPI LastError = %lu\n", GetLastError());
+	putchar('\n');
 	#else
 	if (iswinapi)
 		StringCchPrintfW(bufapi, ERR_BUF_SIZE, L"WinAPI LastError = %lu\n", GetLastError());
