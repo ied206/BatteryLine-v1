@@ -1,4 +1,4 @@
-#ifndef DRAWLINE_H_INCLUDED
+﻿#ifndef DRAWLINE_H_INCLUDED
 #define DRAWLINE_H_INCLUDED
 
 #define ID_ABOUT		2000

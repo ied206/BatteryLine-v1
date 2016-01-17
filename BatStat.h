@@ -1,4 +1,4 @@
-#ifndef BATSTAT_H_INCLUDED
+﻿#ifndef BATSTAT_H_INCLUDED
 #define BATSTAT_H_INCLUDED
 
 // https://msdn.microsoft.com/en-us/library/windows/desktop/aa373232%28v=vs.85%29.aspx

@@ -1,20 +1,20 @@
-#ifndef __BasicInput_h
+ï»¿#ifndef __BasicInput_h
 #define __BasicInput_h
 
-#ifdef _MSC_VER // Visual C++¿¡¼­¸¸ ÄÄÆÄÀÏµÇ´Â ÄÚµå
+#ifdef _MSC_VER // Visual C++ì—ì„œë§Œ ì»´íŒŒì¼ë˜ëŠ” ì½”ë“œ
 #pragma warning(disable:4996)
 #endif // _MSC_VER
 
 #include <stdint.h>
 
-int scanfile (const char name[]); // ÆÄÀÏÀÇ Á¸Àç ¿©ºÎ °Ë»ç
-int WhatBitOS (int print); // ¸îºñÆ® ÄÄÆÄÀÏÀÎ°¡ ¾Ë¾Æ³»±â
+int scanfile (const char name[]); // Is this file exist?
+int WhatBitOS (int print); // inpsect compiling architecture using sizeof(pointer)
 void BinaryDump(const uint8_t buf[], const uint32_t bufsize);
 int CompileYear ();
 int CompileMonth ();
-int CompileDate ();
+int CompileDay ();
 
-#define BIN(X) (((X) % 256) + ((X) % 128) + ((X) % 64) + ((X) % 32) + ((X) % 16) + ((X) % 8) + ((X) % 4) + ((X) % 2))) // 1¹ÙÀÌÆ® ³»¿ÜÀÇ 0, 1·Î ÀÌ·ç¾îÁø ½ÊÁø¼ö¸¦ ÀÌÁø¼ö·Î ¹Ù²ãÁØ´Ù.
+#define BIN(X) (((X) % 256) + ((X) % 128) + ((X) % 64) + ((X) % 32) + ((X) % 16) + ((X) % 8) + ((X) % 4) + ((X) % 2))) // 1ë°”ì´íŠ¸ ë‚´ì™¸ì˜ 0, 1ë¡œ ì´ë£¨ì–´ì§„ ì‹­ì§„ìˆ˜ë¥¼ ì´ì§„ìˆ˜ë¡œ ë°”ê¿”ì¤€ë‹¤.
 
 #define ms2rsec(X) ((X) / 1000)
 #define ms2rmin(X) ((X) / 1000 / 60)

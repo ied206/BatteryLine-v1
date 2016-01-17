@@ -1,13 +1,17 @@
-#include "Var.h"
+﻿#include "Var.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <windows.h>
 #include <shlwapi.h>
+#ifdef _DEBUG
 #undef __CRT__NO_INLINE
+#endif
 #include <strsafe.h>
+#ifdef _DEBUG
 #define __CRT__NO_INLINE
+#endif
 
 #include "BatStat.h"
 #include "DrawLine.h"

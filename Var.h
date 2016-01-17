@@ -1,8 +1,9 @@
-#ifndef VAR_H_INCLUDED
+癤�#ifndef VAR_H_INCLUDED
 #define VAR_H_INCLUDED
 
 // #include "Var.h" must be included at very top of .c file
 
+// These directives are for Windows SDK headers
 #define UNICODE
 #define _UNICODE
 #define OEMRESOURCE
@@ -36,6 +37,7 @@
 
 #define WM_APP_SYSTRAY_POPUP (WM_APP + 0x0001)
 
+// BatteryLine Option constants
 #define BL_MAX_MONITOR		32
 #define BL_COLOR_LEVEL		16
 #define BL_MON_PRIMARY 		0
@@ -56,6 +58,7 @@
 #define BS_LINE_BUF_SIZE	512
 #define BS_STRING_BUF_SIZE	2048
 
+// For parsing, [Section]
 #define BS_SECTION_OFF		0
 #define BS_SECTION_GENERAL	1
 #define BS_SECTION_COLOR	2
@@ -79,17 +82,17 @@
 
 struct bl_option
 {
-	uint8_t showcharge;		// 충전할 때 계속 표시할까
-	uint8_t monitor;		// 어떤 모니터에 표시할까
-	uint8_t position;		// 어디에 표시할까
-	uint8_t taskbar;		// 작업표시줄이랑 겹치면 회피할까?
-	uint8_t transparency;	// 투명도
-	uint8_t height;			// 배터리 표시줄 두께, In Pixel
-	COLORREF defaultcolor;	// 배터리 표시줄 기본 색
-	COLORREF chargecolor;	// 배터리 표시줄 충전시 색
-	COLORREF fullcolor;		// 배터리 표시줄 충전완료 색
-	COLORREF color[BL_COLOR_LEVEL];			// 배터리 표시줄 색
-	uint8_t threshold[BL_COLOR_LEVEL*2];	// 배터리 색 경계
+	uint8_t showcharge;		// Show battery line when charging?
+	uint8_t monitor;		// Which monitor to show battery line?
+	uint8_t position;		// Where to show battery line? (TOP | BOTTOM | LEFT | RIGHT)
+	uint8_t taskbar;		// Evade or not if battery line is overlapped with taskbar
+	uint8_t transparency;	// Transparency of battery line
+	uint8_t height;			// Battery line's height (in pixel)
+	COLORREF defaultcolor;	// Battery line's default color
+	COLORREF chargecolor;	// Battery line's color when charging
+	COLORREF fullcolor;		// Battery line's color when charging is done
+	COLORREF color[BL_COLOR_LEVEL];			// User defined battery line's color
+	uint8_t threshold[BL_COLOR_LEVEL*2];	// User defined edges to pick up user defined color
 };
 typedef struct bl_option BL_OPTION;
 

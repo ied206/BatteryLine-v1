@@ -1,15 +1,21 @@
-// This program is licensed under MIT license.
+﻿// This program is licensed under MIT license.
 
 #include "Var.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+
 #include <windows.h>
-#undef __CRT__NO_INLINE // without this, in Debug mode, produces a lot of warnings
-#include <strsafe.h>
-#define __CRT__NO_INLINE
 #include <commctrl.h>
+#ifdef _DEBUG  // without this, in Debug mode, produces a lot of warnings
+#undef __CRT__NO_INLINE
+#endif
+#include <strsafe.h>
+#ifdef _DEBUG
+#define __CRT__NO_INLINE
+#endif
+
 
 #include "BasicIO.h"
 #include "BatStat.h"
@@ -60,7 +66,7 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	}
 
 	// Destroy Window
-	// BLCB_WM_CLOSE(hWnd, FALSE);
+	BLCB_WM_CLOSE(hWnd, FALSE);
 
 	return Msg.wParam;
 }
@@ -77,7 +83,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 		#endif // _DEBUG_CONSOLE
 		BLDL_AddTrayIcon(hWnd, BL_SysTrayID_ON, NIF_MESSAGE | NIF_TIP | NIF_INFO, WM_APP_SYSTRAY_POPUP, L"BatteryLine On");
 		break;
-    case WM_PAINT: // 0x000F
+    case WM_PAINT:
     	#ifdef _DEBUG_CONSOLE
 		puts("WM_PAINT");
 		#endif // _DEBUG_CONSOLE
@@ -87,7 +93,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	case WM_APP_SYSTRAY_POPUP: // systray msg callback
 		#ifdef _DEBUG_CONSOLE
 		puts("WM_APP_SYSTRAY_POPUP");
-		#endif // _DEBUG_CONSOLE
+		#endif
         switch (lParam)
         {
 		case WM_LBUTTONDBLCLK:
@@ -116,7 +122,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 				#ifdef _DEBUG_CONSOLE
 				puts("  ID_ABOUT");
 				#endif // _DEBUG_CONSOLE
-				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d RC2 (%dbit)\nVisit https://joveler.kr/BatteryLine\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDate());
+				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d (%dbit)\nVisit https://joveler.kr/batteryline\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDay());
 				MessageBoxW(hWnd, msgbox, L"BatteryLine", MB_ICONINFORMATION | MB_OK);
 				break;
 			case ID_SETTING:

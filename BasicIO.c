@@ -1,11 +1,11 @@
-#include <stdio.h>
+癤�#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
 #include "BasicIO.h"
 
-int scanfile (const char name[]) // 파일의 존재 여부 검사
+int scanfile (const char name[]) // Is this file exist?
 {
 	FILE *fp;
 	int tmp = 1;
@@ -18,7 +18,7 @@ int scanfile (const char name[]) // 파일의 존재 여부 검사
 	return tmp;
 }
 
-int WhatBitOS (int print) // 몇비트 컴파일인가 알아내기
+int WhatBitOS (int print) // inpsect compiling architecture using sizeof(pointer)
 {
     if (print)
     {
@@ -109,10 +109,11 @@ void BinaryDump(const uint8_t buf[], const uint32_t bufsize)
 	return;
 }
 
-int CompileYear () // 컴파일한 년도
+// Get compile year from __DATE__ macro
+int CompileYear ()
 {
 	const char macro[16] = __DATE__;
-	char stmp[8] = {0}; // 전체 0으로 초기화
+	char stmp[8] = {0};
 
 	stmp[0] = macro[7];
 	stmp[1] = macro[8];
@@ -123,29 +124,28 @@ int CompileYear () // 컴파일한 년도
 	return atoi(stmp);
 }
 
+// Get compile month from __DATE__ macro
 int CompileMonth ()
-{ // 컴파일한 월 표시
+{
 	const char macro[16] = __DATE__;
 	const char smonth[12][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 	int i = 0;
 
-// 월 감지
 	for (i = 0; i < 12; i++)
 	{
 		if (strstr(macro, smonth[i]) != NULL)
 			return i + 1;
 	}
 
-// -1이 반환되는 경우는 월 인식 불가
 	return -1;
 }
 
-int CompileDate ()
-{ // 컴파일한 일 표시
+// Get compile day from __DATE__ macro
+int CompileDay ()
+{
 	const char macro[16] = __DATE__;
-	char stmp[4] = {0}; // 전체 0으로 초기화
+	char stmp[4] = {0};
 
-// 일 감지
 	stmp[0] = macro[4];
 	stmp[1] = macro[5];
 	stmp[2] = '\0';

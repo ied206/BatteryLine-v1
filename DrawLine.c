@@ -1,4 +1,4 @@
-#include "Var.h"
+癤�#include "Var.h"
 #include "rc\resource.h"
 
 #include <stdio.h>
@@ -7,10 +7,15 @@
 
 #include <windows.h>
 #include <shellapi.h>
-#undef __CRT__NO_INLINE
-#include <strsafe.h>
-#define __CRT__NO_INLINE
 #include <commctrl.h>
+#ifdef _DEBUG
+#undef __CRT__NO_INLINE
+#endif
+#include <strsafe.h>
+#ifdef _DEBUG
+#define __CRT__NO_INLINE
+#endif
+
 
 #include "DrawLine.h"
 #include "BatStat.h"
@@ -33,7 +38,7 @@ HWND BLDL_InitWindow(HINSTANCE hInstance)
 
 	// Create Window
 	ZeroMemory(&WndClsEx, sizeof(WNDCLASSEXW));
-	WndClsEx.cbSize 		= sizeof(WNDCLASSEX);
+	WndClsEx.cbSize 		= sizeof(WNDCLASSEXW);
 	WndClsEx.style 			= 0x0;
 	WndClsEx.lpfnWndProc	= WndProcedure;
 	WndClsEx.cbClsExtra 	= 0;
@@ -74,15 +79,13 @@ HWND BLDL_InitWindow(HINSTANCE hInstance)
 	if (notPowerSrc == NULL || notBatPer == NULL)
 		JV_ErrorHandle(JVERR_RegisterPowerSettingNotification, TRUE);
 
-
-	// Window 불투명도 설정
-	// if (SetLayeredWindowAttributes(hWnd, 0, 200, LWA_ALPHA) == 0)
+	// Window Transparency
 	if (SetLayeredWindowAttributes(hWnd, 0, option.transparency, LWA_ALPHA) == 0)
 		JV_ErrorHandle(JVERR_SetLayeredWindowAttributes, TRUE);
 
 	if (GetSystemPowerStatus(&stat) == 0)
 		JV_ErrorHandle(JVERR_GetSystemPowerStatus, TRUE);
-	if (stat.BatteryFlag & 0x80) // Battery가 장착되어 있는가
+	if (stat.BatteryFlag & 0x80) // Is battery exists?
 		JV_ErrorHandle(JVERR_BATTERY_NOT_EXIST, FALSE);
 
 	ShowWindow(hWnd, SW_SHOWNOACTIVATE); // 4
@@ -445,7 +448,7 @@ BOOL CALLBACK BLCB_MonEnumProc_GetRes(HMONITOR hMonitor, HDC hdcMonitor, LPRECT 
 
 	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
 	g_nMon++;
-	// _GetRes can not inspect which monitor, so set it to -1
+	// _GetRes can not inspect which monitor is primary, so set it to -1
 	g_nPriMon = -1;
 
 	return TRUE;
@@ -485,7 +488,7 @@ BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LP
 }
 
 // Right click BatteryLine icon in Notification Area
-BOOL BLDL_ShowPopupMenu( HWND hWnd, POINT *curpos, int wDefaultItem )
+BOOL BLDL_ShowPopupMenu(HWND hWnd, POINT *curpos, int wDefaultItem)
 {
 	// Add Menu Items
 	HMENU hPopMenu = CreatePopupMenu();
@@ -524,10 +527,13 @@ void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR
 	nid.hWnd 		= hWnd;
 	nid.uID 		= uID;
 	nid.uFlags 		= NIF_ICON | flag;
-	if (uCallbackMsg != 0) // Message 안 던지고 처리
+
+	 // Don't throw an message
+	if (uCallbackMsg != 0)
 		nid.uCallbackMessage = uCallbackMsg;
+
 #ifdef _MSC_VER
-	LoadIconMetric(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), LIM_SMALL, &(nid.hIcon)); // Load the icon for high DPI. However, MinGW-w64 seems has broken for this function...
+	LoadIconMetric(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), LIM_SMALL, &(nid.hIcon)); // Load the icon for high DPI. However, MinGW-w64 cannot link this function...
 #else
 	nid.hIcon 		= (HICON) LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 #endif
