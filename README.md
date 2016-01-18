@@ -27,6 +27,11 @@ You can compile BatteryLine yourself using MinGW-w64.
 3. To compile binary for release, type:
 > mingw32-make
 
+## Microsoft Visual Studio
+This code can be compiled under C99 compliance compiler.
+
+If your version of Visual Studio support declaring variable in the middle of code block in C, this code can be compiled without trouble.
+
 # License
 This project is licensed under MIT License.
 
