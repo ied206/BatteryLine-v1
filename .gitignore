@@ -1,0 +1,14 @@
+# CodeBlocks IDE
+*.cbp
+!BatteryLine-dist.cbp
+*.layout
+*.depend
+
+# generated directories
+bin/
+obj/
+rc/ResEdit/
+res/
+
+# binary genereated ini
+BatteryLine.ini
