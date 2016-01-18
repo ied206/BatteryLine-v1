@@ -4,8 +4,12 @@
 // #include "Var.h" must be included at very top of .c file
 
 // These directives are for Windows SDK headers
+#ifndef UNICODE
 #define UNICODE
+#endif
+#ifndef _UNICODE
 #define _UNICODE
+#endif
 #define OEMRESOURCE
 #define NTDDI_VERSION NTDDI_VISTA
 #define _WIN32_WINNT _WIN32_WINNT_VISTA

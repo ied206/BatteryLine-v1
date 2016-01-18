@@ -8,12 +8,25 @@ Compile and launch BatteryLine.exe.
 
 # Compile
 This program is built under this environment:
-- CodeBlocks 15.12 RC
-- TDM-GCC-64 (MinGW-w64, based on gcc 5.1.0)
+- CodeBlocks
+- TDM-GCC-64 (based on MinGW-w64)
 
 You can compile BatteryLine yourself using MinGW-w64.
 
 ## Using Code::Blocks
+1. Open BatteryLine-dist.cbp using CodeBlocks
+2. Open 'Projects' tab in Management panel (usually at left of screen)
+3. Right-click project 'BatteryLine' and select 'Build Options'
+4. Choose your favorite compiler, usually 'GNU GCC Compiler', then press OK button
+5. Set Build targer to 'Release', then build project.
+6. Binary will be generated in bin\Release\BatteryLine.exe.
 
+## Using make
+1. Add MinGW-w64 toolchain to PATH. Make sure 'gcc, g++, ar, windres, mingw32-make' can be called in console.
+2. Build project with mingw32-make
+3. To compile binary for release, type:
+> mingw32-make
 
+# License
+This project is licensed under MIT License.
 
