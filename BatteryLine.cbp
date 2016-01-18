@@ -53,6 +53,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add option="-std=c99" />
 		</Compiler>
 		<Linker>
 			<Add library="gdi32" />

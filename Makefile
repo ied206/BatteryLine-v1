@@ -12,11 +12,13 @@ LD = g++.exe
 WINDRES = windres.exe
 
 INC = 
-CFLAGS = -Wall
+CFLAGS = -Wall -std=c99 
 RESINC = 
 LIBDIR = 
 LIB = -lgdi32 -luuid -lshlwapi
 LDFLAGS = 
+
+OBJDIR = obj
 
 INC_DEBUG = $(INC)
 CFLAGS_DEBUG = $(CFLAGS) -g -D_DEBUG
@@ -46,7 +48,8 @@ OBJ_RELEASE = $(OBJDIR_RELEASE)\\BasicIO.o $(OBJDIR_RELEASE)\\BatStat.o $(OBJDIR
 
 all: release
 
-clean: clean_debug clean_release
+# clean: clean_debug clean_release
+clean: clean_all
 
 before_debug: 
 	cmd /c if not exist bin\\Debug md bin\\Debug
@@ -79,10 +82,8 @@ $(OBJDIR_DEBUG)\\rc\\BatteryLine.o: rc\\BatteryLine.rc
 	$(WINDRES) -i rc\\BatteryLine.rc -J rc -o $(OBJDIR_DEBUG)\\rc\\BatteryLine.o -O coff $(INC_DEBUG)
 
 clean_debug: 
-	cmd /c del /f $(OBJ_DEBUG) $(OUT_DEBUG)
-	cmd /c rd bin\\Debug
-	cmd /c rd $(OBJDIR_DEBUG)
-	cmd /c rd $(OBJDIR_DEBUG)\\rc
+	cmd /c rd /s /q bin\\Debug
+	cmd /c rd /s /q $(OBJDIR_DEBUG)
 
 before_release: 
 	cmd /c if not exist bin\\Release md bin\\Release
@@ -115,10 +116,12 @@ $(OBJDIR_RELEASE)\\rc\\BatteryLine.o: rc\\BatteryLine.rc
 	$(WINDRES) -i rc\\BatteryLine.rc -J rc -o $(OBJDIR_RELEASE)\\rc\\BatteryLine.o -O coff $(INC_RELEASE)
 
 clean_release: 
-	cmd /c del /f $(OBJ_RELEASE) $(OUT_RELEASE)
-	cmd /c rd bin\\Release
-	cmd /c rd $(OBJDIR_RELEASE)
-	cmd /c rd $(OBJDIR_RELEASE)\\rc
+	cmd /c rd /s /q bin\\Release
+	cmd /c rd /s /q $(OBJDIR_RELEASE)
+
+clean_all:
+	cmd /c rd /s /q bin
+	cmd /c rd /s /q $(OBJDIR)
 
 .PHONY: before_debug after_debug clean_debug before_release after_release clean_release
 
