@@ -21,16 +21,18 @@ You can compile BatteryLine yourself using MinGW-w64.
 5. Set Build targer to 'Release', then build project.
 6. Binary will be generated in bin\Release\BatteryLine.exe.
 
-## Using make
+## Using MinGW make
 1. Add MinGW-w64 toolchain to PATH. Make sure 'gcc, g++, ar, windres, mingw32-make' can be called in console.
 2. Build project with mingw32-make
 3. To compile binary for release, type:
 > mingw32-make
 
-## Microsoft Visual Studio
+## Using Microsoft Visual Studio
 This code can be compiled under C99 compliance compiler.
 
-If your version of Visual Studio support declaring variable in the middle of code block in C, this code can be compiled without trouble.
+In theory, Visual C++ 2010 and later can compile this project.
+
+If you success at compiling in MSVC and have a will to provide README or VC project template, please issue an pull request.
 
 # License
 This project is licensed under MIT License.
