@@ -537,7 +537,6 @@ void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR
 #else
 	nid.hIcon 		= (HICON) LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 #endif
-#undef _MSC_VER
 	StringCchCopyW(nid.szTip, ARRAYSIZE(nid.szTip), BL_SysTrayTip);
 	StringCchCopyW(nid.szInfo, ARRAYSIZE(nid.szInfo), lpInfoStr);
 	nid.uVersion 	= NOTIFYICON_VERSION_4;

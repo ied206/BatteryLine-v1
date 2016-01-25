@@ -122,7 +122,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 				#ifdef _DEBUG_CONSOLE
 				puts("  ID_ABOUT");
 				#endif // _DEBUG_CONSOLE
-				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d (%dbit)\nVisit https://github.com/ied206/BatteryLine\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDay());
+				StringCchPrintfW(msgbox, BL_MSGBOX_BUF_SIZE, L"Joveler's BatteryLine %d.%d (%dbit)\n[Binary] https://joveler.kr/project/batteryline.html\n[Source] https://github.com/ied206/BatteryLine\n\nCompile Date : %04d.%02d.%02d\n", BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(FALSE), CompileYear(), CompileMonth(), CompileDay());
 				MessageBoxW(hWnd, msgbox, L"BatteryLine", MB_ICONINFORMATION | MB_OK);
 				break;
 			case ID_SETTING:

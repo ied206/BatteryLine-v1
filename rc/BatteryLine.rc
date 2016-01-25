@@ -8,4 +8,4 @@
 
 
 IDI_MAINICON            ICON                    ".\\Cycle.ico"
-BL_MANIFEST RT_MANIFEST ".\\BatteryLine.manifest"
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST ".\\BatteryLine.manifest"
