@@ -6,6 +6,8 @@ Written in C, for Win32 platform.
 # Usage
 Compile and launch BatteryLine.exe.
 
+Or, you can download precompiled binary from [project homepage](https://joveler.kr/project/batteryline.html).
+
 # Compile
 This program is built under this environment:
 - CodeBlocks
