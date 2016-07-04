@@ -527,6 +527,7 @@ void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR
 	nid.hWnd 		= hWnd;
 	nid.uID 		= uID;
 	nid.uFlags 		= NIF_ICON | flag;
+	nid.dwInfoFlags = NIIF_NOSOUND | NIIF_USER;
 
 	 // Don't throw an message
 	if (uCallbackMsg != 0)
