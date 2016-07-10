@@ -7,12 +7,12 @@
 
 #include <stdint.h>
 
-int scanfile (const char name[]); // Is this file exist?
-int WhatBitOS (int print); // inpsect compiling architecture using sizeof(pointer)
+int scanfile(const char name[]); // Is this file exist?
+int WhatBitOS();
 void BinaryDump(const uint8_t buf[], const uint32_t bufsize);
-int CompileYear ();
-int CompileMonth ();
-int CompileDay ();
+int CompileYear();
+int CompileMonth();
+int CompileDay();
 
 #define BIN(X) (((X) % 256) + ((X) % 128) + ((X) % 64) + ((X) % 32) + ((X) % 16) + ((X) % 8) + ((X) % 4) + ((X) % 2))) // 1바이트 내외의 0, 1로 이루어진 십진수를 이진수로 바꿔준다.
 

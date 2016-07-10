@@ -18,35 +18,13 @@ int scanfile (const char name[]) // Is this file exist?
 	return tmp;
 }
 
-int WhatBitOS (int print) // inpsect compiling architecture using sizeof(pointer)
+int WhatBitOS()
 {
-    if (print)
-    {
-        if (sizeof(int*) == 4)
-        {
-            printf("This is 32bit Program!\n");
-            return 32;
-        }
-        else if (sizeof(int*) == 8)
-        {
-            printf("This is 64bit Program!\n");
-            return 64;
-        }
-        else
-        {
-			printf("This is %ubit Program!\n", (int) sizeof(int*) * 8);
-            return (sizeof(int*) * 8);
-        }
-    }
-    else
-    {
-        if (sizeof(int*) == 4)
-            return 32;
-        else if (sizeof(int*) == 8)
-            return 64;
-        else
-            return (sizeof(int*) * 8);
-    }
+    if (sizeof(void*) == 8)
+        return 64;
+    else if (sizeof(void*) == 4)
+        return 32;
+    return 0;
 }
 
 // Linux-Style Hex Dump
@@ -109,8 +87,8 @@ void BinaryDump(const uint8_t buf[], const uint32_t bufsize)
 	return;
 }
 
-// Get compile year from __DATE__ macro
-int CompileYear ()
+// Get compiled year from MinGW-w64's __DATE__
+int CompileYear()
 {
 	const char macro[16] = __DATE__;
 	char stmp[8] = {0};
@@ -124,8 +102,8 @@ int CompileYear ()
 	return atoi(stmp);
 }
 
-// Get compile month from __DATE__ macro
-int CompileMonth ()
+// Get compiled month from MinGW-w64's __DATE__
+int CompileMonth()
 {
 	const char macro[16] = __DATE__;
 	const char smonth[12][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
@@ -137,11 +115,12 @@ int CompileMonth ()
 			return i + 1;
 	}
 
+	// return -1 for error
 	return -1;
 }
 
-// Get compile day from __DATE__ macro
-int CompileDay ()
+// Get compiled day from MinGW-w64's __DATE__
+int CompileDay()
 {
 	const char macro[16] = __DATE__;
 	char stmp[4] = {0};
@@ -151,4 +130,3 @@ int CompileDay ()
 	stmp[2] = '\0';
 	return atoi(stmp);
 }
-

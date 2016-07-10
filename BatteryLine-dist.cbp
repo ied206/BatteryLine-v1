@@ -58,7 +58,7 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="Var.h" />
-		<Unit filename="rc/BatteryLine.rc">
+		<Unit filename="rc/Resource.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
 		<Extensions>

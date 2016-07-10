@@ -16,19 +16,15 @@
 #define __CRT__NO_INLINE
 #endif
 
-
 #include "DrawLine.h"
 #include "BatStat.h"
 #include "ErrorHandle.h"
+#include "BasicIO.h"
 
-// http://soen.kr/
-// www.functionx.com/win32/Lesson01.htm
-// http://www.codeproject.com/Articles/15829/Vista-Goodies-in-C-Monitoring-the-Computer-s-Power
-// http://www.zachburlingame.com/2011/04/capturing-windows-power-events-in-a-console-application/
-// https://msdn.microsoft.com/en-us/library/ms703398%28v=vs.85%29.aspx
-// http://www.transmissionzero.co.uk/computing/win32-apps-with-mingw/
-// http://www.rw-designer.com/DPI-aware
+
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+extern BL_ARG g_arg;
+extern HWND g_hWnd;
 
 HWND BLDL_InitWindow(HINSTANCE hInstance)
 {
@@ -79,16 +75,18 @@ HWND BLDL_InitWindow(HINSTANCE hInstance)
 	if (notPowerSrc == NULL || notBatPer == NULL)
 		JV_ErrorHandle(JVERR_RegisterPowerSettingNotification, TRUE);
 
-	// Window Transparency
+	// Set window Transparency
 	if (SetLayeredWindowAttributes(hWnd, 0, option.transparency, LWA_ALPHA) == 0)
 		JV_ErrorHandle(JVERR_SetLayeredWindowAttributes, TRUE);
 
+	// Check if this system has battery
 	if (GetSystemPowerStatus(&stat) == 0)
 		JV_ErrorHandle(JVERR_GetSystemPowerStatus, TRUE);
 	if (stat.BatteryFlag & 0x80) // Is battery exists?
 		JV_ErrorHandle(JVERR_BATTERY_NOT_EXIST, FALSE);
 
-	ShowWindow(hWnd, SW_SHOWNOACTIVATE); // 4
+	// Init first window
+	ShowWindow(hWnd, SW_SHOWNOACTIVATE);
 	BLDL_SetWindowPos(hWnd, &stat);
 	if (UpdateWindow(hWnd) == 0)
 		JV_ErrorHandle(JVERR_UpdateWindow, FALSE);
@@ -375,33 +373,6 @@ void BLCB_SetWindowPos(HWND hWnd)
 	}
 }
 
-void BLCB_OpenSettingIni(HWND hWnd)
-{
-	wchar_t* path_buf = NULL;
-	uint32_t path_size = 0;
-
-	// Get current directory's string length
-    path_size = GetCurrentDirectoryW(path_size, path_buf);
-	if (path_size == 0)
-		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
-
-	// Allocate file_buf to write absolute path
-	path_size = path_size + wcslen(BL_SettingFile) + 8;
-	path_buf = (PWSTR) malloc(sizeof(wchar_t) * path_size); // 8 for \\ and NULL
-	if (0 == GetCurrentDirectoryW(path_size, path_buf)) // Error!
-	{
-		free(path_buf);
-		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
-	}
-
-	StringCchCatW(path_buf, path_size, L"\\");
-	StringCchCatW(path_buf, path_size, BL_SettingFile);
-
-	// Open BatteryLine.ini
-	ShellExecuteW(hWnd, L"open", path_buf, NULL, NULL, SW_SHOW);
-
-	free(path_buf);
-}
 
 void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit)
 {
@@ -493,9 +464,13 @@ BOOL BLDL_ShowPopupMenu(HWND hWnd, POINT *curpos, int wDefaultItem)
 	// Add Menu Items
 	HMENU hPopMenu = CreatePopupMenu();
 	InsertMenuW(hPopMenu, 0, MF_BYPOSITION | MF_STRING, ID_ABOUT, L"About");
-	InsertMenuW(hPopMenu, 1, MF_BYPOSITION | MF_STRING, ID_SETTING, L"Setting");
-	InsertMenuW(hPopMenu, 2, MF_BYPOSITION | MF_STRING, ID_POWERINFO, L"Power Info");
-	InsertMenuW(hPopMenu, 3, MF_BYPOSITION | MF_STRING, ID_EXIT, L"Exit");
+	InsertMenuW(hPopMenu, 1, MF_BYPOSITION | MF_STRING, ID_HELP, L"Help");
+	InsertMenuW(hPopMenu, 2, MF_BYPOSITION | MF_STRING, ID_LICENSE, L"License");
+	InsertMenuW(hPopMenu, 5, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
+	InsertMenuW(hPopMenu, 6, MF_BYPOSITION | MF_STRING, ID_SETTING, L"Setting");
+	InsertMenuW(hPopMenu, 7, MF_BYPOSITION | MF_STRING, ID_POWERINFO, L"Power Info");
+	InsertMenuW(hPopMenu, 10, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
+	InsertMenuW(hPopMenu, 11, MF_BYPOSITION | MF_STRING, ID_EXIT, L"Exit");
 
 	SetMenuDefaultItem(hPopMenu, ID_ABOUT, FALSE);
 	SetFocus(hWnd);
@@ -519,18 +494,18 @@ BOOL BLDL_ShowPopupMenu(HWND hWnd, POINT *curpos, int wDefaultItem)
 
 void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR lpInfoStr)
 {
-	NOTIFYICONDATA nid;
-	ZeroMemory(&nid, sizeof(NOTIFYICONDATA));
+	NOTIFYICONDATAW nid;
+	ZeroMemory(&nid, sizeof(NOTIFYICONDATAW));
 
 	// Notification Icon
-	nid.cbSize 		= sizeof(NOTIFYICONDATA);
+	nid.cbSize 		= sizeof(NOTIFYICONDATAW);
 	nid.hWnd 		= hWnd;
 	nid.uID 		= uID;
 	nid.uFlags 		= NIF_ICON | flag;
 	nid.dwInfoFlags = NIIF_NOSOUND | NIIF_USER;
 
 	 // Don't throw an message
-	if (uCallbackMsg != 0)
+	if (uCallbackMsg)
 		nid.uCallbackMessage = uCallbackMsg;
 
 #ifdef _MSC_VER
@@ -556,4 +531,66 @@ void BLDL_DelTrayIcon(HWND hWnd, UINT uID)
 	Shell_NotifyIcon(NIM_DELETE, &nid);
 }
 
-// https://msdn.microsoft.com/en-us/library/windows/desktop/ee330740%28v=vs.85%29.aspx#install_icon
+void BLCB_OpenSettingIni(HWND hWnd)
+{
+	wchar_t* pathBuf = NULL;
+	uint32_t pathSize = 0;
+
+	// Get current directory's string length
+    pathSize = GetCurrentDirectoryW(pathSize, pathBuf);
+	if (pathSize == 0)
+		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
+
+	// Allocate file_buf to write absolute path
+	pathSize = pathSize + wcslen(BL_SettingFile) + 8;
+	pathBuf = (PWSTR) malloc(sizeof(wchar_t) * pathSize); // 8 for \\ and NULL
+	if (0 == GetCurrentDirectoryW(pathSize, pathBuf)) // Error!
+	{
+		free(pathBuf);
+		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
+	}
+
+	StringCchCatW(pathBuf, pathSize, L"\\");
+	StringCchCatW(pathBuf, pathSize, BL_SettingFile);
+
+	// Open BatteryLine.ini
+	ShellExecuteW(hWnd, L"open", pathBuf, NULL, NULL, SW_SHOW);
+
+	free(pathBuf);
+}
+
+void BLDL_OpenLicense(HWND hWnd)
+{
+	// Open GitHub repository's LICENSE page
+	ShellExecuteW(hWnd, L"open", L"https://github.com/ied206/BatteryLine/blob/master/LICENSE", NULL, NULL, SW_SHOW);
+}
+
+void BLDL_PrintBanner(HWND hWnd)
+{
+	wchar_t msg[BL_MSGBOX_BUF_SIZE];
+
+	StringCchPrintfW(msg, BL_MSGBOX_BUF_SIZE,
+						L"Joveler's BatteryLine v%d.%d (%dbit)\n"
+						L"Show battery status as line in screen.\n\n"
+						L"[Binary] %s\n"
+						L"[Source] %s\n\n"
+						L"Build %04d%02d%02d",
+						BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(),
+						BL_WebBinary, BL_WebSource,
+						CompileYear(), CompileMonth(), CompileDay());
+	printf("%S\n\n", msg);
+	MessageBoxW(hWnd, msg, L"BatteryLine", MB_ICONINFORMATION | MB_OK);
+}
+
+void BLDL_PrintHelp(HWND hWnd)
+{
+	wchar_t* msg = 	L"[BatteryLine Help Message]\n"
+					L"Show battery status as line in screen.\n\n"
+					L"[Command Line Option]\n"
+					L"-q : Launch this program without notification.\n"
+					L"-h : Print this help message and exit.\n\n"
+					L"[Setting]\n"
+					L"You can edit BatteryLine's setting in BatteryLine.ini.";
+	printf("%S\n\n", msg);
+	MessageBoxW(hWnd, msg, L"BatteryLine", MB_ICONINFORMATION | MB_OK);
+}

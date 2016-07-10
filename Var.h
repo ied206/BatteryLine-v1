@@ -28,15 +28,17 @@
 #define FALSE	0
 
 // BL for BatteryLine
-#define BL_WindowName 	L"Joveler\'s BatteryLine"
-#define BL_ClassName	L"Joveler_BatteryLine"
-#define BL_SysTrayTip   L"BatteryLine"
-#define BL_SettingFile 	L"BatteryLine.ini"
+#define BL_WindowName 		L"Joveler\'s BatteryLine"
+#define BL_ClassName		L"Joveler_BatteryLine"
+#define BL_SysTrayTip   	L"BatteryLine"
+#define BL_SettingFile 		L"BatteryLine.ini"
+#define BL_WebBinary		L"https://joveler.kr/project/batteryline.html"
+#define BL_WebSource		L"https://github.com/ied206/BatteryLine"
 #define BL_SysTrayID_ON		1
 #define BL_SysTrayID_OFF	2
 
 #define BL_MAJOR_VER		1
-#define BL_MINOR_VER		0
+#define BL_MINOR_VER		1
 #define BL_MSGBOX_BUF_SIZE	2048
 
 #define WM_APP_SYSTRAY_POPUP (WM_APP + 0x0001)
@@ -82,6 +84,19 @@
 #define BLU_RGB_R(X)	((X) % 0x100)
 #define BLU_RGB_G(X)	(((X) % 0x10000) / 0x100)
 #define BLU_RGB_B(X)	(((X) % 0x1000000) / 0x10000)
+
+// BLA for BattreyLine Arguments
+#define BLA_QUIET_OFF	0
+#define BLA_QUIET_ON	1
+#define BLA_HELP_OFF	0
+#define BLA_HELP_ON		1
+
+struct bl_arg
+{
+    int quiet; // Do notification?
+    int help; // help message
+};
+typedef struct bl_arg BL_ARG;
 
 
 struct bl_option
