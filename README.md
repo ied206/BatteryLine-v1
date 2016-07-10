@@ -1,7 +1,7 @@
 # BatteryLine
 BatteryLine shows system's battery status as line in screen.
 
-Written in C, for Win32 platform.
+Written in C99, for Win32 platform.
 
 # Usage
 Compile and launch BatteryLine.exe.
@@ -23,17 +23,19 @@ You can compile BatteryLine yourself using MinGW-w64.
 5. Set Build targer to 'Release', then build project.
 6. Binary will be generated in bin\Release\BatteryLine.exe.
 
-## Using make
-1. Add MinGW-w64 toolchain to PATH. Make sure 'gcc, g++, ar, windres, mingw32-make' can be called in console.
-2. Build project with mingw32-make
-3. To compile binary for release, type:
+## Using MinGW-w64 and make
+1\. Add MinGW-w64 toolchain to PATH. Make sure `gcc, g++, ar, windres, mingw32-make` can be called in console.  
+2\. Build project with mingw32-make
+```
+Type this in source directory's root:
 > mingw32-make
+```
+3\. 32bit and 64bit binaries are compiled under `bin` folder.
 
 ## Microsoft Visual Studio
-This code can be compiled under C99 compliance compiler.
-
-If your version of Visual Studio support declaring variable in the middle of code block in C, this code can be compiled without trouble.
+This code can be compiled under C99 compliance compiler.  
+If your version of Visual Studio support C99, this code would be compiled without trouble.  
+Any contribution related to add official MSVC support is welcome.
 
 # License
 This project is licensed under MIT License.
-

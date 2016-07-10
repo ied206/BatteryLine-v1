@@ -7,8 +7,11 @@
 # generated directories
 bin/
 obj/
-rc/ResEdit/
 res/
 
-# binary genereated ini
+# genereated ini from binary
 BatteryLine.ini
+
+# Executable
+*.exe
+*.dll
