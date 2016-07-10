@@ -465,12 +465,14 @@ BOOL BLDL_ShowPopupMenu(HWND hWnd, POINT *curpos, int wDefaultItem)
 	HMENU hPopMenu = CreatePopupMenu();
 	InsertMenuW(hPopMenu, 0, MF_BYPOSITION | MF_STRING, ID_ABOUT, L"About");
 	InsertMenuW(hPopMenu, 1, MF_BYPOSITION | MF_STRING, ID_HELP, L"Help");
-	InsertMenuW(hPopMenu, 2, MF_BYPOSITION | MF_STRING, ID_LICENSE, L"License");
-	InsertMenuW(hPopMenu, 5, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
-	InsertMenuW(hPopMenu, 6, MF_BYPOSITION | MF_STRING, ID_SETTING, L"Setting");
-	InsertMenuW(hPopMenu, 7, MF_BYPOSITION | MF_STRING, ID_POWERINFO, L"Power Info");
 	InsertMenuW(hPopMenu, 10, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
-	InsertMenuW(hPopMenu, 11, MF_BYPOSITION | MF_STRING, ID_EXIT, L"Exit");
+	InsertMenuW(hPopMenu, 11, MF_BYPOSITION | MF_STRING, ID_HOMEPAGE, L"Homepage");
+	InsertMenuW(hPopMenu, 12, MF_BYPOSITION | MF_STRING, ID_LICENSE, L"License");
+	InsertMenuW(hPopMenu, 20, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
+	InsertMenuW(hPopMenu, 21, MF_BYPOSITION | MF_STRING, ID_SETTING, L"Setting");
+	InsertMenuW(hPopMenu, 22, MF_BYPOSITION | MF_STRING, ID_POWERINFO, L"Power Info");
+	InsertMenuW(hPopMenu, 30, MF_BYPOSITION | MF_SEPARATOR, 0, NULL);
+	InsertMenuW(hPopMenu, 31, MF_BYPOSITION | MF_STRING, ID_EXIT, L"Exit");
 
 	SetMenuDefaultItem(hPopMenu, ID_ABOUT, FALSE);
 	SetFocus(hWnd);
@@ -557,6 +559,12 @@ void BLCB_OpenSettingIni(HWND hWnd)
 	ShellExecuteW(hWnd, L"open", pathBuf, NULL, NULL, SW_SHOW);
 
 	free(pathBuf);
+}
+
+void BLDL_OpenHomepage(HWND hWnd)
+{
+	// Open GitHub repository's LICENSE page
+	ShellExecuteW(hWnd, L"open", BL_WebBinary, NULL, NULL, SW_SHOW);
 }
 
 void BLDL_OpenLicense(HWND hWnd)

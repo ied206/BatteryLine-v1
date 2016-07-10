@@ -32,7 +32,7 @@
 #define BL_ClassName		L"Joveler_BatteryLine"
 #define BL_SysTrayTip   	L"BatteryLine"
 #define BL_SettingFile 		L"BatteryLine.ini"
-#define BL_WebBinary		L"https://joveler.kr/project/batteryline.html"
+#define BL_WebBinary		L"https://ied206.github.io/BatteryLine"
 #define BL_WebSource		L"https://github.com/ied206/BatteryLine"
 #define BL_SysTrayID_ON		1
 #define BL_SysTrayID_OFF	2

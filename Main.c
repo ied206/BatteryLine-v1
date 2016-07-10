@@ -155,6 +155,12 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 				#endif // _DEBUG_CONSOLE
 				BLDL_PrintHelp(g_hWnd);
 				break;
+			case ID_HOMEPAGE:
+				#ifdef _DEBUG_CONSOLE
+				puts(" ID_HOMEPAGE");
+				#endif // _DEBUG_CONSOLE
+				BLDL_OpenHomepage(g_hWnd);
+				break;
 			case ID_LICENSE:
 				#ifdef _DEBUG_CONSOLE
 				puts("  ID_LICENSE");
@@ -162,10 +168,16 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 				BLDL_OpenLicense(g_hWnd);
 				break;
 			case ID_SETTING:
+				#ifdef _DEBUG_CONSOLE
+				puts("  ID_SETTING");
+				#endif // _DEBUG_CONSOLE
 				if (MessageBoxW(hWnd, L"Edit BatteryLine.ini and run BatteryLine again.\n", L"BatteryLine", MB_ICONINFORMATION | MB_OKCANCEL) == IDOK)
 					BLCB_OpenSettingIni(hWnd);
 				break;
 			case ID_POWERINFO:
+				#ifdef _DEBUG_CONSOLE
+				puts("  ID_POWERINFO");
+				#endif // _DEBUG_CONSOLE
 				BLBS_GetBatteryStat();
 				break;
 			case ID_EXIT:
@@ -178,10 +190,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
         break;
 	case WM_CLOSE:
 		#ifdef _DEBUG_CONSOLE
-		if (Msg == WM_CLOSE)
-			puts("WM_CLOSE");
-		else if (Msg == WM_DESTROY)
-			puts("WM_DESTROY");
+		puts("WM_CLOSE");
 		#endif // _DEBUG_CONSOLE
 		BLCB_WM_CLOSE(hWnd, TRUE);
         break;
