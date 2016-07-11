@@ -39,4 +39,4 @@ Any contribution related to add official MSVC support is welcome.
 
 # License
 This project is licensed under MIT License.  
-Binary distribution of this project is compiled with TDM-GCC-64, which links [winpthreads](http://mingw-w64.org) provided by MinGW-w64.
+Binary distribution of this project is compiled with TDM-GCC-64, which links [winpthreads](http://mingw-w64.org) statically.  
