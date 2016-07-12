@@ -28,5 +28,6 @@ The battery charge status. This member can contain one or more of the following 
 
 int BLBS_ReadSetting();
 int BLBS_GetBatteryStat();
+wchar_t* BLBS_GetIniFullPath(wchar_t* iniFullPath, const size_t bufSize);
 
 #endif // BATSTAT_H_INCLUDED

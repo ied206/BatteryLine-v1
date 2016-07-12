@@ -72,8 +72,7 @@ int BLBS_ReadSetting()
 	wchar_t path_buf[MAX_PATH] = {0};
 	uint32_t file_size = 0;
 
-	GetModuleFileNameW(NULL, path_buf, MAX_PATH);
-	StringCbCopyW(StrRChrW(path_buf, NULL, L'\\')+1, MAX_PATH, BL_SettingFile);
+	BLBS_GetIniFullPath(path_buf, sizeof(path_buf));
 
 	#ifdef _DEBUG_CONSOLE
 	printf("[IniFile]\n%S\n\n", path_buf);
@@ -573,4 +572,12 @@ int BLBS_GetBatteryStat()
 // DEBUG Information End
 
     return 0;
+}
+
+wchar_t* BLBS_GetIniFullPath(wchar_t* iniFullPath, const size_t bufSize)
+{
+	GetModuleFileNameW(NULL, iniFullPath, bufSize);
+	wchar_t* dirPath = StrRChrW(iniFullPath, NULL, L'\\')+1;
+	StringCbCopyW(dirPath, bufSize, BL_SettingFile);
+	return iniFullPath;
 }

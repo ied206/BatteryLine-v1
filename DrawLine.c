@@ -531,30 +531,10 @@ void BLDL_DelTrayIcon(HWND hWnd, UINT uID)
 
 void BLCB_OpenSettingIni(HWND hWnd)
 {
-	wchar_t* pathBuf = NULL;
-	uint32_t pathSize = 0;
-
-	// Get current directory's string length
-    pathSize = GetCurrentDirectoryW(pathSize, pathBuf);
-	if (pathSize == 0)
-		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
-
-	// Allocate file_buf to write absolute path
-	pathSize = pathSize + wcslen(BL_SettingFile) + 8;
-	pathBuf = (PWSTR) malloc(sizeof(wchar_t) * pathSize); // 8 for \\ and NULL
-	if (0 == GetCurrentDirectoryW(pathSize, pathBuf)) // Error!
-	{
-		free(pathBuf);
-		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
-	}
-
-	StringCchCatW(pathBuf, pathSize, L"\\");
-	StringCchCatW(pathBuf, pathSize, BL_SettingFile);
-
+	wchar_t pathBuf[MAX_PATH] = {0};
+	BLBS_GetIniFullPath(pathBuf, sizeof(pathBuf));
 	// Open BatteryLine.ini
 	ShellExecuteW(hWnd, L"open", pathBuf, NULL, NULL, SW_SHOW);
-
-	free(pathBuf);
 }
 
 void BLDL_OpenHomepage(HWND hWnd)
