@@ -71,7 +71,13 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	if (GetSystemPowerStatus(&stat) == 0)
 		JV_ErrorHandle(JVERR_GetSystemPowerStatus, TRUE);
 	if (stat.BatteryFlag & 0x80) // Is battery exists?
-		JV_ErrorHandle(JVERR_BATTERY_NOT_EXIST, FALSE);
+	{
+		if (!g_arg.quiet)
+			JV_ErrorHandle(JVERR_BATTERY_NOT_EXIST, FALSE);
+		else
+			exit(JVERR_BATTERY_NOT_EXIST);
+	}
+
 
 	// Find if BatteryLine is already running.
 	hWnd = FindWindowW(BL_ClassName, 0);
