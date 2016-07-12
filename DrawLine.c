@@ -79,13 +79,9 @@ HWND BLDL_InitWindow(HINSTANCE hInstance)
 	if (SetLayeredWindowAttributes(hWnd, 0, option.transparency, LWA_ALPHA) == 0)
 		JV_ErrorHandle(JVERR_SetLayeredWindowAttributes, TRUE);
 
-	// Check if this system has battery
+	// Init first window
 	if (GetSystemPowerStatus(&stat) == 0)
 		JV_ErrorHandle(JVERR_GetSystemPowerStatus, TRUE);
-	if (stat.BatteryFlag & 0x80) // Is battery exists?
-		JV_ErrorHandle(JVERR_BATTERY_NOT_EXIST, FALSE);
-
-	// Init first window
 	ShowWindow(hWnd, SW_SHOWNOACTIVATE);
 	BLDL_SetWindowPos(hWnd, &stat);
 	if (UpdateWindow(hWnd) == 0)

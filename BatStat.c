@@ -68,25 +68,12 @@ int BLBS_ReadSetting()
 	// Init and declare variables
     HANDLE hFile;
 	uint8_t make_ini = FALSE; // If this is true, use default option
-	wchar_t* file_buf = NULL, *path_buf = NULL;
-	uint32_t file_size = 0, path_size = 0;
+	wchar_t* file_buf = NULL;
+	wchar_t path_buf[MAX_PATH] = {0};
+	uint32_t file_size = 0;
 
-	// Get current directory's string length
-    path_size = GetCurrentDirectoryW(path_size, path_buf);
-	if (path_size == 0)
-		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
-
-	// Allocate file_buf to write absolute path
-	path_size = path_size + wcslen(BL_SettingFile) + 8;
-	path_buf = (PWSTR) malloc(sizeof(wchar_t) * path_size); // 8 for \\ and NULL
-	if (0 == GetCurrentDirectoryW(path_size, path_buf)) // Error!
-	{
-		free(path_buf);
-		JV_ErrorHandle(JVERR_GetCurrentDirectory, TRUE);
-	}
-
-	StringCchCatW(path_buf, path_size, L"\\");
-	StringCchCatW(path_buf, path_size, BL_SettingFile);
+	GetModuleFileNameW(NULL, path_buf, MAX_PATH);
+	StringCbCopyW(StrRChrW(path_buf, NULL, L'\\')+1, MAX_PATH, BL_SettingFile);
 
 	#ifdef _DEBUG_CONSOLE
 	printf("[IniFile]\n%S\n\n", path_buf);
@@ -175,10 +162,6 @@ int BLBS_ReadSetting()
 		file_buf[sztmp+1] = L'\n';
 		file_buf[sztmp+2] = L'\0';
 	}
-
-	// Do not need absolute path of BatteryLine.ini
-	free(path_buf);
-	path_buf = NULL;
 
 	// Parse ini File - Too complex...
 	wchar_t* str_cursor = NULL, *str_next = NULL;

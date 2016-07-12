@@ -26,9 +26,7 @@ The battery charge status. This member can contain one or more of the following 
 0-100, 255 : Unknown
 */
 
-
 int BLBS_ReadSetting();
 int BLBS_GetBatteryStat();
-
 
 #endif // BATSTAT_H_INCLUDED
