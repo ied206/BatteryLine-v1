@@ -20,6 +20,15 @@ void JV_ErrorHandle(int code, int iswinapi)
 
 	switch (code)
 	{
+	// 0xx : Misc
+	case JVERR_INVALID_ARGUMENT:
+		msg =	"ErrorMessage : JVERR_INVALID_ARGUMENT\n"
+				"Invalid argument. Use -h to see help message.\n";
+		break;
+	case JVERR_MALLOC_FAILURE:
+		msg =	"ErrorMessage : JVERR_MALLOC_FAILURE\n"
+				"System's memory is too low.\n";
+		break;
 	// 1xx : WinAPI Failure
 	case JVERR_GetSystemPowerStatus:
 		msg =	"ErrorMessage : JVERR_GetSystemPowerStatus\n"

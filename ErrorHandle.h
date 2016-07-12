@@ -6,7 +6,8 @@
 // ErrorMessage
 
 // under 100 : etc
-#define JVERR_MALLOC_FAILURE					1
+#define JVERR_INVALID_ARGUMENT					1
+#define JVERR_MALLOC_FAILURE					2
 // 1xx : WinAPI Failure
 #define JVERR_GetSystemPowerStatus				100
 #define JVERR_LoadIcon							101

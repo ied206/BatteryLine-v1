@@ -54,11 +54,7 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	// Get Command line arguments
 	argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     if (BL_ParseArg(argc, argv, &g_arg))
-	{
-		fprintf(stderr, "[ERR] Invalid argument\n\n");
-		MessageBox(NULL, L"[ERR] Invalid argument", L"Error", MB_ICONERROR | MB_OK);
-		exit(1);
-	}
+		JV_ErrorHandle(JVERR_INVALID_ARGUMENT, FALSE);
 
 	// Print Help Message and exit if '-h' '/?' is used
 	if (g_arg.help)
@@ -77,7 +73,6 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		else
 			exit(JVERR_BATTERY_NOT_EXIST);
 	}
-
 
 	// Find if BatteryLine is already running.
 	hWnd = FindWindowW(BL_ClassName, 0);
@@ -256,6 +251,8 @@ bool BL_ParseArg(int argc, LPWSTR* argv, BL_ARG* arg)
 				arg->quiet = BLA_QUIET_ON;
 			else if (StrCmpIW(argv[i], L"-h") == 0 || StrCmpIW(argv[i], L"--help") == 0 || StrCmpIW(argv[i], L"/?") == 0 || StrCmpIW(argv[i], L"-?") == 0)
 				arg->help = BLA_HELP_ON;
+			else
+				flag_err = true;
 		}
 	}
 
