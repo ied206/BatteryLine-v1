@@ -1,6 +1,4 @@
 # CodeBlocks IDE
-*.cbp
-!BatteryLine-dist.cbp
 *.layout
 *.depend
 

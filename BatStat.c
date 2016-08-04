@@ -66,7 +66,7 @@ wchar_t* BL_DefaultSettingStr =
 int BLBS_ReadSetting()
 {
 	// Init and declare variables
-    HANDLE hFile;
+	HANDLE hFile;
 	uint8_t make_ini = FALSE; // If this is true, use default option
 	wchar_t* file_buf = NULL;
 	wchar_t path_buf[MAX_PATH] = {0};
@@ -74,20 +74,20 @@ int BLBS_ReadSetting()
 
 	BLBS_GetIniFullPath(path_buf, sizeof(path_buf));
 
-	#ifdef _DEBUG_CONSOLE
+#ifdef _DEBUG_CONSOLE
 	printf("[IniFile]\n%S\n\n", path_buf);
-	#endif // _DEBUG_CONSOLE
+#endif // _DEBUG_CONSOLE
 
 	// File IO
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/bb540534%28v=vs.85%29.aspx
 	// Open File
 	hFile = CreateFileW(path_buf,				// lpFileName
-					  GENERIC_READ | GENERIC_WRITE, // dwDesiredAccess
-					  FILE_SHARE_READ, 				// dwShareMode
-					  NULL, 						// lpSecurityAttributes
-					  OPEN_EXISTING, 				// dwCreationDisposition
-					  FILE_ATTRIBUTE_NORMAL,		// dwFlagsAndAttributes
-					  NULL);						// hTemplateFile
+						GENERIC_READ | GENERIC_WRITE, // dwDesiredAccess
+						FILE_SHARE_READ, 				// dwShareMode
+						NULL, 						// lpSecurityAttributes
+						OPEN_EXISTING, 				// dwCreationDisposition
+						FILE_ATTRIBUTE_NORMAL,		// dwFlagsAndAttributes
+						NULL);						// hTemplateFile
 
 	// Cannot open! Error Handling
 	if (hFile == INVALID_HANDLE_VALUE)
@@ -100,7 +100,8 @@ int BLBS_ReadSetting()
 	}
 
 	if (make_ini)
-	{ // no BatteryLine.ini, so generate BatteryLine.ini. Note : hFile is invalid at this point
+	{
+		// no BatteryLine.ini, so generate BatteryLine.ini. Note : hFile is invalid at this point
 		uint32_t written_byte = 0;
 
 		// Write default setting to file
@@ -129,11 +130,12 @@ int BLBS_ReadSetting()
 		// Close Handle
 		CloseHandle(hFile);
 
-        // point file_buf to BL_DefaultSettingStr, no dyn alloc
+		// point file_buf to BL_DefaultSettingStr, no dyn alloc
 		file_buf = BL_DefaultSettingStr;
 	}
 	else
-	{ // file is successfully open, read setting from file. Note : hFile is alive at this point
+	{
+		// file is successfully open, read setting from file. Note : hFile is alive at this point
 		uint32_t read_byte = 0;
 		size_t sztmp = 0;
 
@@ -195,15 +197,16 @@ int BLBS_ReadSetting()
 		str_cursor = str_next + 1; // Fot next iteration, move cursor to next line
 
 		// For debugging, there is too many segfaults in parsing alg!
-		#ifdef _DEBUG_PARSING
+#ifdef _DEBUG_PARSING
 		printf("line_rawbuf : %S\n", line_rawbuf);
 		printf("state       : %u\n", state_section);
-		#endif
+#endif
 
 		// Finite State Machine Model
 		// 03 line_rawbuf has [] -> start a section, represent as 'state'
 		if (StrChrW(line_rawbuf, L'[') != NULL && StrChrW(line_rawbuf, L']') != NULL)
-		{ // Contains [ ]
+		{
+			// Contains [ ]
 			switch (state_section)
 			{
 			case BS_SECTION_OFF:
@@ -243,7 +246,7 @@ int BLBS_ReadSetting()
 			for (uint32_t i = 0; i < line_len; i++)
 			{
 				if (line_rawbuf[i] == L'#') // if we meet # in the middle, ignore remnant characters
-                    break;
+					break;
 
 				if (line_rawbuf[i] != L'\t' && line_rawbuf[i] != L' ' && line_rawbuf[i] != L'\r' && line_rawbuf[i] != L'\n')
 				{
@@ -254,9 +257,9 @@ int BLBS_ReadSetting()
 			line_buf[x] = L'\0';
 			line_len = x;
 
-			#ifdef _DEBUG_PARSING
+#ifdef _DEBUG_PARSING
 			printf("line_buf    : %S\n", line_buf);
-			#endif
+#endif
 
 			switch (state_section)
 			{
@@ -276,7 +279,8 @@ int BLBS_ReadSetting()
 				StringCchCopyW(equal_right, BS_LINE_BUF_SIZE, line_buf+(equal_pos-line_buf+1)); // Copy right part
 
 				if (StrCmpIW(equal_left, L"showcharge") == 0)
-				{ // {true, false}
+				{
+					// {true, false}
 					if (StrCmpIW(equal_right, L"true") == 0)
 						option.showcharge = TRUE;
 					else if (StrCmpIW(equal_right, L"false") == 0)
@@ -286,7 +290,8 @@ int BLBS_ReadSetting()
 					valid.showcharge = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"monitor") == 0)
-				{ // {primary, 1, 2, ... , 32}
+				{
+					// {primary, 1, 2, ... , 32}
 					if (StrCmpIW(equal_right, L"primary") == 0)
 						option.monitor = BL_MON_PRIMARY;
 					else
@@ -299,9 +304,9 @@ int BLBS_ReadSetting()
 						ZeroMemory(&g_monInfo, sizeof(MONITORINFO) * BL_MAX_MONITOR);
 						EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetFullInfo, 0);
 
-						#ifdef _DEBUG_MONITOR
+#ifdef _DEBUG_MONITOR
 						printf("[Monitor]\nThis system has %d monitors.\n\n", g_nMon);
-						#endif
+#endif
 
 						if (!(1 <= dword && dword <= BL_MAX_MONITOR))
 							JV_ErrorHandle(JVERR_OPT_INI_INVALID_MONITOR, FALSE);
@@ -313,7 +318,8 @@ int BLBS_ReadSetting()
 					valid.monitor = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"position") == 0)
-				{ // {top, bottom, left, right}
+				{
+					// {top, bottom, left, right}
 					if (StrCmpIW(equal_right, L"top") == 0)
 						option.position = BL_POS_TOP;
 					else if (StrCmpIW(equal_right, L"bottom") == 0)
@@ -327,7 +333,8 @@ int BLBS_ReadSetting()
 					valid.position = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"taskbar") == 0)
-				{ // {ignore, evade}
+				{
+					// {ignore, evade}
 					if (StrCmpIW(equal_right, L"ignore") == 0)
 						option.taskbar = BL_TASKBAR_IGNORE;
 					else if (StrCmpIW(equal_right, L"evade") == 0)
@@ -337,7 +344,8 @@ int BLBS_ReadSetting()
 					valid.taskbar = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"transparency") == 0)
-				{ // {0 <= number <= 255}
+				{
+					// {0 <= number <= 255}
 					int32_t dword = _wtoi(equal_right);
 					if (!(0 <= dword && dword <= 255))
 						JV_ErrorHandle(JVERR_OPT_INI_INVALID_TRANSPARENCY, FALSE);
@@ -345,7 +353,8 @@ int BLBS_ReadSetting()
 					valid.transparency = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"height") == 0)
-				{ // {1 <= number <= 255}
+				{
+					// {1 <= number <= 255}
 					int32_t dword = _wtoi(equal_right);
 					if (!(1 <= dword && dword <= 255))
 						JV_ErrorHandle(JVERR_OPT_INI_INVALID_HEIGHT, FALSE);
@@ -367,7 +376,8 @@ int BLBS_ReadSetting()
 				StringCchCopyW(equal_right, BS_LINE_BUF_SIZE, line_buf+(equal_pos-line_buf+1)); // Copy right part
 
 				if (!StrCmpIW(equal_left, L"defaultcolor"))
-				{ // Format : {R, G, B}
+				{
+					// Format : {R, G, B}
 					quote_pos = equal_right;
 					for (uint32_t i = 0; i < 3; i++) // R, G, B
 					{
@@ -385,16 +395,23 @@ int BLBS_ReadSetting()
 							JV_ErrorHandle(JVERR_OPT_INI_INVALID_DEFAULTCOLOR, FALSE);
 						switch (i)
 						{
-						case 0:		r8 = dword;		break;
-						case 1:		g8 = dword;		break;
-						case 2:		b8 = dword;		break;
+						case 0:
+							r8 = dword;
+							break;
+						case 1:
+							g8 = dword;
+							break;
+						case 2:
+							b8 = dword;
+							break;
 						}
 					}
 					option.defaultcolor = RGB(r8, g8, b8);
 					valid.defaultcolor = TRUE;
 				}
 				else if (!StrCmpIW(equal_left, L"chargecolor"))
-				{ // Format : {R, G, B}
+				{
+					// Format : {R, G, B}
 					quote_pos = equal_right;
 					for (uint32_t i = 0; i < 3; i++) // R, G, B
 					{
@@ -411,16 +428,23 @@ int BLBS_ReadSetting()
 							JV_ErrorHandle(JVERR_OPT_INI_INVALID_CHARGECOLOR, FALSE);
 						switch (i)
 						{
-						case 0:		r8 = dword;		break;
-						case 1:		g8 = dword;		break;
-						case 2:		b8 = dword;		break;
+						case 0:
+							r8 = dword;
+							break;
+						case 1:
+							g8 = dword;
+							break;
+						case 2:
+							b8 = dword;
+							break;
 						}
 					}
 					option.chargecolor = RGB(r8, g8, b8);
 					valid.chargecolor = TRUE;
 				}
 				else if (!StrCmpIW(equal_left, L"fullcolor"))
-				{ // Format : {R, G, B}
+				{
+					// Format : {R, G, B}
 					quote_pos = equal_right;
 					for (uint32_t i = 0; i < 3; i++) // R, G, B
 					{
@@ -437,16 +461,23 @@ int BLBS_ReadSetting()
 							JV_ErrorHandle(JVERR_OPT_INI_INVALID_FULLCOLOR, FALSE);
 						switch (i)
 						{
-						case 0:		r8 = dword;		break;
-						case 1:		g8 = dword;		break;
-						case 2:		b8 = dword;		break;
+						case 0:
+							r8 = dword;
+							break;
+						case 1:
+							g8 = dword;
+							break;
+						case 2:
+							b8 = dword;
+							break;
 						}
 					}
 					option.fullcolor = RGB(r8, g8, b8);
 					valid.fullcolor = TRUE;
 				}
 				else if (StrCmpIW(equal_left, L"color") == 0)
-				{ // {LowEdge, HighEdge, R, G, B}, Support up to 16 thresholds
+				{
+					// {LowEdge, HighEdge, R, G, B}, Support up to 16 thresholds
 					quote_pos = equal_right;
 					for (uint32_t i = 0; i < 5; i++) // R, G, B
 					{
@@ -463,11 +494,21 @@ int BLBS_ReadSetting()
 							JV_ErrorHandle(JVERR_OPT_INI_INVALID_COLOR, FALSE);
 						switch (i)
 						{
-						case 0:		lowedge8 = dword;	break;
-						case 1:		highedge8 = dword;	break;
-						case 2:		r8 = dword;			break;
-						case 3:		g8 = dword;			break;
-						case 4:		b8 = dword;			break;
+						case 0:
+							lowedge8 = dword;
+							break;
+						case 1:
+							highedge8 = dword;
+							break;
+						case 2:
+							r8 = dword;
+							break;
+						case 3:
+							g8 = dword;
+							break;
+						case 4:
+							b8 = dword;
+							break;
 						}
 					}
 
@@ -499,7 +540,7 @@ int BLBS_ReadSetting()
 	}
 
 	// Debug print
- 	#ifdef _DEBUG_CONSOLE
+#ifdef _DEBUG_CONSOLE
 	puts("[Setting]");
 	printf("showcharge   = %u\n", option.showcharge);
 	printf("monitor      = %u\n", option.monitor);
@@ -521,13 +562,13 @@ int BLBS_ReadSetting()
 	}
 	putchar('\n');
 	puts("[Event]"); // For WndProcedure Debug Message
- 	#endif
+#endif
 
 	// Check necessary options are read successfully
-    if (!(valid.showcharge && valid.monitor && valid.position && valid.taskbar && valid.transparency && valid.height // Section [General]
-		&& valid.defaultcolor && valid.chargecolor && valid.fullcolor)) // Section [Color]
+	if (!(valid.showcharge && valid.monitor && valid.position && valid.taskbar && valid.transparency && valid.height // Section [General]
+			&& valid.defaultcolor && valid.chargecolor && valid.fullcolor)) // Section [Color]
 	{
-        JV_ErrorHandle(JVERR_OPT_INI_MISSING_OPTIONS, FALSE);
+		JV_ErrorHandle(JVERR_OPT_INI_MISSING_OPTIONS, FALSE);
 	}
 
 	return 0;
@@ -564,14 +605,14 @@ int BLBS_GetBatteryStat()
 		msg_charge = L"Using Battery";
 
 	StringCchPrintfW(fullmsg, BS_STRING_BUF_SIZE,
-					L"Power Source : %ws\n"
-					L"Battery Status : %ws\n"
-					L"Battery Percent : %d%%\n",
-					msg_ac, msg_charge, stat.BatteryLifePercent);
+					 L"Power Source : %ws\n"
+					 L"Battery Status : %ws\n"
+					 L"Battery Percent : %d%%\n",
+					 msg_ac, msg_charge, stat.BatteryLifePercent);
 	MessageBoxW(NULL, fullmsg, L"Power Info", MB_ICONINFORMATION | MB_OK);
 // DEBUG Information End
 
-    return 0;
+	return 0;
 }
 
 wchar_t* BLBS_GetIniFullPath(wchar_t* iniFullPath, const size_t bufSize)

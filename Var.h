@@ -19,9 +19,9 @@
 
 // MACRO for DEBUG
 #ifdef _DEBUG
-	#define _DEBUG_CONSOLE
-	//#define _DEBUG_PARSING
-	//#define _DEBUG_MONITOR
+#define _DEBUG_CONSOLE
+//#define _DEBUG_PARSING
+//#define _DEBUG_MONITOR
 #endif
 
 #define TRUE	1
@@ -93,8 +93,8 @@
 
 struct bl_arg
 {
-    int quiet; // Do notification?
-    int help; // help message
+	int quiet; // Do notification?
+	int help; // help message
 };
 typedef struct bl_arg BL_ARG;
 

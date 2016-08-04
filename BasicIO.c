@@ -10,7 +10,7 @@ int scanfile (const char name[]) // Is this file exist?
 	FILE *fp;
 	int tmp = 1;
 
-    fp = fopen(name, "r");
+	fp = fopen(name, "r");
 	if (fp == NULL)
 		tmp = 0;
 	else
@@ -20,11 +20,11 @@ int scanfile (const char name[]) // Is this file exist?
 
 int WhatBitOS()
 {
-    if (sizeof(void*) == 8)
-        return 64;
-    else if (sizeof(void*) == 4)
-        return 32;
-    return 0;
+	if (sizeof(void*) == 8)
+		return 64;
+	else if (sizeof(void*) == 4)
+		return 32;
+	return 0;
 }
 
 // Linux-Style Hex Dump

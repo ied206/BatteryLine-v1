@@ -54,17 +54,17 @@ HWND BLDL_InitWindow(HINSTANCE hInstance)
 	RegisterClassExW(&WndClsEx);
 
 	hWnd = CreateWindowExW(WS_EX_NOACTIVATE | WS_EX_LAYERED | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT | WS_EX_TOPMOST, // dwExStyle 0x080800A8
-						BL_ClassName, 	// lpClassName
-						BL_WindowName, 	// lpWindowName
-						WS_POPUP,		 // dwStyle, 0x80000000
-						0, 		// X
-						0, 		// Y
-						0, 		// nWidth
-						0, 		// nHeight
-						NULL,		// hWndParent
-						NULL, 		// hMenu
-						hInstance,	// hInstance
-						NULL);		// lpParam
+						   BL_ClassName, 	// lpClassName
+						   BL_WindowName, 	// lpWindowName
+						   WS_POPUP,		 // dwStyle, 0x80000000
+						   0, 		// X
+						   0, 		// Y
+						   0, 		// nWidth
+						   0, 		// nHeight
+						   NULL,		// hWndParent
+						   NULL, 		// hMenu
+						   hInstance,	// hInstance
+						   NULL);		// lpParam
 
 	if (!IsWindow(hWnd)) // Is Window Created?
 		JV_ErrorHandle(JVERR_CreateWindowEx, TRUE); // If Not Created, terminate
@@ -138,7 +138,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 		if (!(option.monitor <= g_nMon))
 		{
 			option.monitor = BL_MON_PRIMARY;
-            JV_WarnHandle(JVWARN_OPT_INVALID_MONITOR, FALSE);
+			JV_WarnHandle(JVWARN_OPT_INVALID_MONITOR, FALSE);
 		}
 
 		// Get this monitor's screen resolution
@@ -153,7 +153,8 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 		// Calculate where taskbar is, using rcWork and rcMonitor's relation.
 		// trayPos is calculated as taskbar is in PRIMARY, since coord is calculated relative to base coord of monitor.
 		if (g_monInfo[option.monitor-1].rcMonitor.top != g_monInfo[option.monitor-1].rcWork.top)
-		{ // TaskBar is on TOP
+		{
+			// TaskBar is on TOP
 			taskbar = BL_TASKBAR_TOP;
 			trayPos.top 	= 0;
 			trayPos.bottom 	= g_monInfo[option.monitor-1].rcWork.top - g_monInfo[option.monitor-1].rcMonitor.top;
@@ -161,7 +162,8 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			trayPos.right 	= scr_x;
 		}
 		else if (g_monInfo[option.monitor-1].rcMonitor.bottom != g_monInfo[option.monitor-1].rcWork.bottom)
-		{ // TaskBar is on BOTTOM
+		{
+			// TaskBar is on BOTTOM
 			taskbar = BL_TASKBAR_BOTTOM;
 			trayPos.top 	= g_monInfo[option.monitor-1].rcWork.bottom - g_monInfo[option.monitor-1].rcMonitor.top;
 			trayPos.bottom 	= scr_y;
@@ -169,7 +171,8 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			trayPos.right 	= scr_x;
 		}
 		else if (g_monInfo[option.monitor-1].rcMonitor.left != g_monInfo[option.monitor-1].rcWork.left)
-		{ // TaskBar is on LEFT
+		{
+			// TaskBar is on LEFT
 			taskbar = BL_TASKBAR_LEFT;
 			trayPos.top 	= 0;
 			trayPos.bottom 	= scr_y;
@@ -177,7 +180,8 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			trayPos.right 	= g_monInfo[option.monitor-1].rcWork.left - g_monInfo[option.monitor-1].rcMonitor.left;
 		}
 		else if (g_monInfo[option.monitor-1].rcMonitor.right != g_monInfo[option.monitor-1].rcWork.right)
-		{ // TaskBar is on RIGHT
+		{
+			// TaskBar is on RIGHT
 			taskbar = BL_TASKBAR_RIGHT;
 			trayPos.top 	= 0;
 			trayPos.bottom 	= scr_y;
@@ -185,7 +189,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 			trayPos.right 	= scr_x;
 		}
 
-		#ifdef _DEBUG_MONITOR
+#ifdef _DEBUG_MONITOR
 		puts("[LineDisplay]");
 		printf("Displaying on monitor %d\n", option.monitor - 1);
 		printf("Screen Resolution      : (%d, %d)\n", scr_x, scr_y);
@@ -193,7 +197,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 		printf("Taskbar (left,top)     : (%ld, %ld)\n", trayPos.left, trayPos.top);
 		printf("Taskbar (right,bottom) : (%ld, %ld)\n", trayPos.right, trayPos.bottom);
 		putchar('\n');
-		#endif // _DEBUG_MONITOR
+#endif // _DEBUG_MONITOR
 	}
 
 	// Set Position of window
@@ -208,7 +212,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 
 		// Only for primary monitor. Evade taskbar logic.
 		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
-			&& taskbar == BL_TASKBAR_TOP) // TaskBar is on TOP - conflict
+				&& taskbar == BL_TASKBAR_TOP) // TaskBar is on TOP - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
 				scr_win_y = trayPos.bottom;
@@ -230,7 +234,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 
 		// Only for primary monitor. Evade taskbar logic.
 		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
-			&& taskbar == BL_TASKBAR_BOTTOM) // TaskBar is on BOTTOM - conflict
+				&& taskbar == BL_TASKBAR_BOTTOM) // TaskBar is on BOTTOM - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
 				scr_win_y = trayPos.top - option.height;
@@ -252,7 +256,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 
 		// Only for primary monitor. Evade taskbar logic.
 		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
-			&& taskbar == BL_TASKBAR_LEFT) // TaskBar is on LEFT - conflict
+				&& taskbar == BL_TASKBAR_LEFT) // TaskBar is on LEFT - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
 				scr_win_x = trayPos.right;
@@ -274,7 +278,7 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 
 		// Only for primary monitor. Evade taskbar logic.
 		if (option.taskbar != BL_TASKBAR_IGNORE // IGNORE -> behave regardless of taskbar
-			&& taskbar == BL_TASKBAR_RIGHT) // TaskBar is on RIGHT - conflict
+				&& taskbar == BL_TASKBAR_RIGHT) // TaskBar is on RIGHT - conflict
 		{
 			if (option.taskbar == BL_TASKBAR_EVADE)
 				scr_win_x = trayPos.left - option.height;
@@ -325,7 +329,7 @@ void BLCB_WM_PAINT(HWND hWnd)
 		for (uint32_t i = 0; i < BL_COLOR_LEVEL; i++)
 		{
 			if (!(option.threshold[2*i] == 0 && option.threshold[2*i+1] == 0)  // 0,0 -> blank
-				&& option.threshold[2*i] <= stat.BatteryLifePercent && stat.BatteryLifePercent <= option.threshold[2*i+1]) // Ex 20 <= '45' <= 50
+					&& option.threshold[2*i] <= stat.BatteryLifePercent && stat.BatteryLifePercent <= option.threshold[2*i+1]) // Ex 20 <= '45' <= 50
 				color_idx = i;
 		}
 
@@ -404,14 +408,14 @@ BOOL CALLBACK BLCB_MonEnumProc_GetRes(HMONITOR hMonitor, HDC hdcMonitor, LPRECT 
 	g_monInfo[g_nMon].rcMonitor.left 	= lprcMonitor->left;
 	g_monInfo[g_nMon].rcMonitor.right 	= lprcMonitor->right;
 
-	#ifdef _DEBUG_MONITOR
+#ifdef _DEBUG_MONITOR
 	printf("[Monitor %d]\n", g_nMon);
 	printf("res_x        : %ld\n", g_monInfo[g_nMon].rcMonitor.right - g_monInfo[g_nMon].rcMonitor.left);
 	printf("res_y        : %ld\n", g_monInfo[g_nMon].rcMonitor.bottom - g_monInfo[g_nMon].rcMonitor.top);
 	printf("left-top     : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.left, g_monInfo[g_nMon].rcMonitor.top);
 	printf("right-bottom : (%ld, %ld)\n", g_monInfo[g_nMon].rcMonitor.right, g_monInfo[g_nMon].rcMonitor.bottom);
 	putchar('\n');
-	#endif
+#endif
 
 	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
 	g_nMon++;
@@ -430,13 +434,13 @@ BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LP
 	// ZeroMemory(&g_monInfo, sizeof(MONITORINFO) * BL_MAX_MONITOR);
 
 	// Get monitor info
-    g_monInfo[g_nMon].cbSize = sizeof(MONITORINFO);
-    GetMonitorInfoW(hMonitor, &g_monInfo[g_nMon]);
+	g_monInfo[g_nMon].cbSize = sizeof(MONITORINFO);
+	GetMonitorInfoW(hMonitor, &g_monInfo[g_nMon]);
 
-    if (g_monInfo[g_nMon].dwFlags == MONITORINFOF_PRIMARY)
+	if (g_monInfo[g_nMon].dwFlags == MONITORINFOF_PRIMARY)
 		g_nPriMon = g_nMon;
 
-	#ifdef _DEBUG_MONITOR
+#ifdef _DEBUG_MONITOR
 	printf("[Monitor %d]\n", g_nMon);
 	printf("res_x            : %ld\n", g_monInfo[g_nMon].rcMonitor.right - g_monInfo[g_nMon].rcMonitor.left);
 	printf("res_y            : %ld\n", g_monInfo[g_nMon].rcMonitor.bottom - g_monInfo[g_nMon].rcMonitor.top);
@@ -446,9 +450,9 @@ BOOL CALLBACK BLCB_MonEnumProc_GetFullInfo(HMONITOR hMonitor, HDC hdcMonitor, LP
 	printf("right-bottom (W) : (%ld, %ld)\n", g_monInfo[g_nMon].rcWork.right, g_monInfo[g_nMon].rcWork.bottom);
 	printf("primary      : %d\n", (g_monInfo[g_nMon].dwFlags == MONITORINFOF_PRIMARY) ? TRUE : FALSE);
 	putchar('\n');
-	#endif
+#endif
 
-   	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
+	// It is assumed that g_nMon is init to 0 before calling EnumDisplayMonitors
 	g_nMon++;
 
 	return TRUE;
@@ -502,7 +506,7 @@ void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR
 	nid.uFlags 		= NIF_ICON | flag;
 	nid.dwInfoFlags = NIIF_NOSOUND | NIIF_USER;
 
-	 // Don't throw an message
+	// Don't throw an message
 	if (uCallbackMsg)
 		nid.uCallbackMessage = uCallbackMsg;
 
@@ -554,14 +558,14 @@ void BLDL_PrintBanner(HWND hWnd)
 	wchar_t msg[BL_MSGBOX_BUF_SIZE];
 
 	StringCchPrintfW(msg, BL_MSGBOX_BUF_SIZE,
-						L"Joveler's BatteryLine v%d.%d (%dbit)\n"
-						L"Show battery status as line in screen.\n\n"
-						L"[Binary] %s\n"
-						L"[Source] %s\n\n"
-						L"Build %04d%02d%02d",
-						BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(),
-						BL_WebBinary, BL_WebSource,
-						CompileYear(), CompileMonth(), CompileDay());
+					 L"Joveler's BatteryLine v%d.%d (%dbit)\n"
+					 L"Show battery status as line in screen.\n\n"
+					 L"[Binary] %s\n"
+					 L"[Source] %s\n\n"
+					 L"Build %04d%02d%02d",
+					 BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(),
+					 BL_WebBinary, BL_WebSource,
+					 CompileYear(), CompileMonth(), CompileDay());
 	printf("%S\n\n", msg);
 	MessageBoxW(hWnd, msg, L"BatteryLine", MB_ICONINFORMATION | MB_OK);
 }
