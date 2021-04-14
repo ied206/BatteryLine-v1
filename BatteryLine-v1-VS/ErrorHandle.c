@@ -156,6 +156,10 @@ void JV_ErrorHandle(int code, int iswinapi)
 		msg =	"ErrorMessage : JVERR_OPT_INI_TOO_MUCH_COLOR\n"
 				"Too much color in BetteryLine.ini. Check \'[Color] Section\'.\n";
 		break;
+	case JVERR_OPT_INI_INVALID_REFRESH:
+		msg =	"ErrorMessage : JVERR_OPT_INI_INVALID_REFRESH\n"
+				"Too much color in BetteryLine.ini. Check \'[Color] Section\'.\n";
+		break;
 	// 25x
 	case JVERR_OPT_INVALID_TASKBAR:
 		msg =	"ErrorMessage : JVERR_OPT_INVALID_TASKBAR\n"

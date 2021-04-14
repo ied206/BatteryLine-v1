@@ -19,6 +19,7 @@
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 extern BL_ARG g_arg;
 extern HWND g_hWnd;
+extern UINT_PTR g_timerId;
 
 HWND BLDL_InitWindow(HINSTANCE hInstance)
 {
@@ -369,10 +370,15 @@ void BLCB_SetWindowPos(HWND hWnd)
 	}
 }
 
+void BLDL_SetTimer(HWND hWnd)
+{
+	g_timerId = SetTimer(hWnd, 0, option.refresh * 1000, NULL);
+}
 
 void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit)
 {
 	BLDL_DelTrayIcon(hWnd, BL_SysTrayID_ON);
+	KillTimer(hWnd, g_timerId);
 
 	UnregisterPowerSettingNotification(not_bat_per);
 	UnregisterPowerSettingNotification(not_power_src);
@@ -553,13 +559,35 @@ void BLDL_PrintBanner(HWND hWnd)
 {
 	wchar_t msg[BL_MSGBOX_BUF_SIZE];
 
+	// Query process architecture
+	SYSTEM_INFO sysInfo;
+	ZeroMemory(&sysInfo, sizeof(SYSTEM_INFO));
+	GetSystemInfo(&sysInfo);
+
+	wchar_t* arch = L"unknown";
+	switch (sysInfo.wProcessorArchitecture)
+	{
+	case PROCESSOR_ARCHITECTURE_INTEL: // x86
+		arch = L"x86";
+		break;
+	case PROCESSOR_ARCHITECTURE_AMD64: // AMD64 
+		arch = L"amd64";
+		break;
+	case PROCESSOR_ARCHITECTURE_ARM: // ARMv7
+		arch = L"arm";
+		break;
+	case PROCESSOR_ARCHITECTURE_ARM64: // AArch64
+		arch = L"arm64";
+		break;
+	}
+
 	StringCchPrintfW(msg, BL_MSGBOX_BUF_SIZE,
-					 L"Joveler's BatteryLine v%d.%d (%dbit)\n"
+					 L"Joveler's BatteryLine v%d.%d (%s)\n"
 					 L"Show battery status as line in screen.\n\n"
 					 L"[Binary] %s\n"
 					 L"[Source] %s\n\n"
 					 L"Build %04d%02d%02d",
-					 BL_MAJOR_VER, BL_MINOR_VER, WhatBitOS(),
+					 BL_MAJOR_VER, BL_MINOR_VER, arch,
 					 BL_WebBinary, BL_WebSource,
 					 CompileYear(), CompileMonth(), CompileDay());
 	printf("%S\n\n", msg);

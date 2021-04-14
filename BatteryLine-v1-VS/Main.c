@@ -16,7 +16,6 @@
 #include <shlwapi.h>
 #include <commctrl.h>
 #include <strsafe.h>
-#include <WinUser.h>
 
 // Custom Headers
 #include "BasicIO.h"
@@ -34,6 +33,7 @@ int g_nPriMon;
 BL_MONINFO g_monRes[BL_MAX_MONITOR];
 MONITORINFO g_monInfo[BL_MAX_MONITOR];
 BL_ARG g_arg;
+UINT_PTR g_timerId;
 
 LRESULT CALLBACK WndProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 bool BL_ParseArg(int argc, LPWSTR* argv, BL_ARG* arg);
@@ -95,8 +95,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// Load settings from BatteryLine.ini
 	BLBS_ReadSetting();
 
-	// Decode and treat the messages as long as the application is running
+	// Init BatteryLine window
 	g_hWnd = hWnd = BLDL_InitWindow(hInstance);
+
+	// Set BatteryLine timer
+	BLDL_SetTimer(hWnd);
+
+	// Decode and treat the messages as long as the application is running
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
 		TranslateMessage(&msg);
@@ -235,6 +240,12 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		puts("WM_DPICHANGED");
 #endif // _DEBUG_CONSOLE
 		BLCB_SetWindowPos(hWnd); // Redraw windows if DPI is changed
+		break;
+	case WM_TIMER:
+#ifdef _DEBUG_CONSOLE
+		puts("WM_TIMER");
+#endif // _DEBUG_CONSOLE
+		BLCB_SetWindowPos(hWnd); // Redraw windows if a timer was called
 		break;
 	default:
 		return DefWindowProc(hWnd, msg, wParam, lParam);

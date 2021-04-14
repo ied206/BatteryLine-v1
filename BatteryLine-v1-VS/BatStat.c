@@ -37,6 +37,9 @@ wchar_t* BL_DefaultSettingStr =
 	L"# transparency : Transparency of BatteryLine\r\n"
 	L"#                  255 is opaque, 0 is totally transparent\r\n"
 	L"#                  {0 <= number <= 255}\r\n"
+	L"# refresh      : Timer refresh interval\r\n"
+	L"#                  Set to 0 to disable timer\r\n"
+	L"#                  {0 <= number <= 65535}\r\n"
 	L"# height       : BatteryLine's height in pixel\r\n"
 	L"#                  {1 <= number <= 25z5}\r\n"
 	L"showcharge   = true\r\n"
@@ -44,7 +47,8 @@ wchar_t* BL_DefaultSettingStr =
 	L"position     = top\r\n"
 	L"taskbar      = ignore\r\n"
 	L"transparency = 196\r\n"
-	L"height       = 5\r\n\r\n"
+	L"refresh      = 60\r\n"
+	L"height       = 4\r\n\r\n"
 	L"[Color]\r\n"
 	L"# defaultcolor : BatteryLine's default color\r\n"
 	L"# chargecolor  : BatteryLine's color when charging\r\n"
@@ -347,6 +351,15 @@ int BLBS_ReadSetting()
 					option.transparency = (uint8_t) dword;
 					valid.transparency = TRUE;
 				}
+				else if (StrCmpIW(equal_left, L"refresh") == 0)
+				{
+					// {0 <= number <= 65535}
+					int32_t dword = _wtoi(equal_right);
+					if (!(0 <= dword && dword <= 65535))
+						JV_ErrorHandle(JVERR_OPT_INI_INVALID_HEIGHT, FALSE);
+					option.refresh = (uint16_t)dword;
+					valid.refresh = TRUE;
+				}
 				else if (StrCmpIW(equal_left, L"height") == 0)
 				{
 					// {1 <= number <= 255}
@@ -560,8 +573,8 @@ int BLBS_ReadSetting()
 #endif
 
 	// Check necessary options are read successfully
-	if (!(valid.showcharge && valid.monitor && valid.position && valid.taskbar && valid.transparency && valid.height // Section [General]
-			&& valid.defaultcolor && valid.chargecolor && valid.fullcolor)) // Section [Color]
+	if (!(valid.showcharge && valid.monitor && valid.position && valid.taskbar && valid.transparency && valid.refresh && valid.height // Section [General]
+		&& valid.defaultcolor && valid.chargecolor && valid.fullcolor)) // Section [Color]
 	{
 		JV_ErrorHandle(JVERR_OPT_INI_MISSING_OPTIONS, FALSE);
 	}

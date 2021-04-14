@@ -19,7 +19,7 @@
 
 // MACRO for DEBUG
 #ifdef _DEBUG
-#define _DEBUG_CONSOLE
+	#define _DEBUG_CONSOLE
 //#define _DEBUG_PARSING
 //#define _DEBUG_MONITOR
 #endif
@@ -38,7 +38,7 @@
 #define BL_SysTrayID_OFF	2
 
 #define BL_MAJOR_VER		1
-#define BL_MINOR_VER		1
+#define BL_MINOR_VER		2
 #define BL_MSGBOX_BUF_SIZE	2048
 
 #define WM_APP_SYSTRAY_POPUP (WM_APP + 0x0001)
@@ -106,6 +106,7 @@ struct bl_option
 	uint8_t position;		// Where to show battery line? (TOP | BOTTOM | LEFT | RIGHT)
 	uint8_t taskbar;		// Evade or not if battery line is overlapped with taskbar
 	uint8_t transparency;	// Transparency of battery line
+	uint16_t refresh;		// Timer interval (set 0 to disable)
 	uint8_t height;			// Battery line's height (in pixel)
 	COLORREF defaultcolor;	// Battery line's default color
 	COLORREF chargecolor;	// Battery line's color when charging
