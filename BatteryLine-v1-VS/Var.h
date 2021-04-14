@@ -1,5 +1,4 @@
-﻿#ifndef VAR_H_INCLUDED
-#define VAR_H_INCLUDED
+﻿#pragma once
 
 // #include "Var.h" must be included at very top of .c file
 
@@ -10,9 +9,10 @@
 #ifndef _UNICODE
 #define _UNICODE
 #endif
+
 #define OEMRESOURCE
-#define NTDDI_VERSION NTDDI_VISTA
-#define _WIN32_WINNT _WIN32_WINNT_VISTA
+
+#include "targetver.h"
 
 #include <windows.h>
 #include <stdint.h>
@@ -32,8 +32,8 @@
 #define BL_ClassName		L"Joveler_BatteryLine"
 #define BL_SysTrayTip   	L"BatteryLine"
 #define BL_SettingFile 		L"BatteryLine.ini"
-#define BL_WebBinary		L"https://ied206.github.io/BatteryLine"
-#define BL_WebSource		L"https://github.com/ied206/BatteryLine"
+#define BL_WebBinary		L"https://github.com/ied206/BatteryLine-v1"
+#define BL_WebSource		L"https://github.com/ied206/BatteryLine-v1"
 #define BL_SysTrayID_ON		1
 #define BL_SysTrayID_OFF	2
 
@@ -140,5 +140,3 @@ extern int g_nPriMon; // Which monitor is primary monitor?
 extern MONITORINFO g_monInfo[BL_MAX_MONITOR];
 extern BL_MONINFO g_monRes[BL_MAX_MONITOR];
 // http://www.transmissionzero.co.uk/computing/win32-apps-with-mingw/
-
-#endif // VAR_H_INCLUDED

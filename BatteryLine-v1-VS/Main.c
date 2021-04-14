@@ -1,24 +1,24 @@
 ﻿// This program is licensed under MIT license.
 
+// Custom Constants
 #include "Var.h"
 
+// C Runtime Headers
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <inttypes.h>
 
+// Windows SDK Headers
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shlwapi.h>
 #include <commctrl.h>
-#ifdef _DEBUG  // without this, in Debug mode, produces a lot of warnings
-#undef __CRT__NO_INLINE
-#endif
 #include <strsafe.h>
-#ifdef _DEBUG
-#define __CRT__NO_INLINE
-#endif
+#include <WinUser.h>
 
+// Custom Headers
 #include "BasicIO.h"
 #include "BatStat.h"
 #include "ErrorHandle.h"
@@ -39,11 +39,16 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam
 bool BL_ParseArg(int argc, LPWSTR* argv, BL_ARG* arg);
 
 
-int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
-					LPSTR lpCmdLine, int nCmdShow)
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR    lpCmdLine,
+	_In_ int       nCmdShow)
 {
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
+
 	HWND hWnd;
-	MSG	Msg;
+	MSG	msg;
 	int argc = 0;
 	LPWSTR* argv = NULL;
 
@@ -92,21 +97,21 @@ int WINAPI WinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 	// Decode and treat the messages as long as the application is running
 	g_hWnd = hWnd = BLDL_InitWindow(hInstance);
-	while (GetMessage(&Msg, NULL, 0, 0))
+	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		TranslateMessage(&Msg);
-		DispatchMessage(&Msg);
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
 
 	// Destroy Window
 	BLCB_WM_CLOSE(hWnd, FALSE);
 
-	return Msg.wParam;
+	return (int)msg.wParam;
 }
 
-LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WndProcedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	switch (Msg)
+	switch (msg)
 	{
 	case WM_CREATE:
 #ifdef _DEBUG_CONSOLE
@@ -189,7 +194,7 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case ID_EXIT:
 #ifdef _DEBUG_CONSOLE
-			puts("  ID_EXIT");;
+			puts("  ID_EXIT");
 #endif // _DEBUG_CONSOLE
 			PostMessage(hWnd, WM_CLOSE, 0, 0);
 			break;
@@ -210,23 +215,29 @@ LRESULT CALLBACK WndProcedure(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 	case WM_SETTINGCHANGE:
 	case WM_POWERBROADCAST:
 #ifdef _DEBUG_CONSOLE
-		if (Msg == WM_SETTINGCHANGE)
+		if (msg == WM_SETTINGCHANGE)
 			puts("WM_SETTINGCHANGE");
-		else if (Msg == WM_POWERBROADCAST)
+		else if (msg == WM_POWERBROADCAST)
 			puts("WM_POWERBROADCAST");
 #endif // _DEBUG_CONSOLE
 		BLCB_SetWindowPos(hWnd);
 		break;
 	case WM_DISPLAYCHANGE: // Monitor is attached or detached, Screen resolution changed, etc. Check for HMONITOR's validity.
 #ifdef _DEBUG_CONSOLE
-		if (Msg == WM_DISPLAYCHANGE)
+		if (msg == WM_DISPLAYCHANGE)
 			puts("WM_DISPLAYCHANGE");
 #endif // _DEBUG_CONSOLE
 		// BringWindowToTop(hWnd);
 		BLCB_SetWindowPos(hWnd); // Redraw windows if changed resolution
 		break;
+	case WM_DPICHANGED:
+#ifdef _DEBUG_CONSOLE
+		puts("WM_DPICHANGED");
+#endif // _DEBUG_CONSOLE
+		BLCB_SetWindowPos(hWnd); // Redraw windows if DPI is changed
+		break;
 	default:
-		return DefWindowProc(hWnd, Msg, wParam, lParam);
+		return DefWindowProc(hWnd, msg, wParam, lParam);
 		break;
 	}
 

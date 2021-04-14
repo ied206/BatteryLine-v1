@@ -1,5 +1,5 @@
 ﻿#include "Var.h"
-#include "rc\resource.h"
+#include "Resource.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,13 +8,7 @@
 #include <windows.h>
 #include <shellapi.h>
 #include <commctrl.h>
-#ifdef _DEBUG
-#undef __CRT__NO_INLINE
-#endif
 #include <strsafe.h>
-#ifdef _DEBUG
-#define __CRT__NO_INLINE
-#endif
 
 #include "DrawLine.h"
 #include "BatStat.h"
@@ -39,13 +33,13 @@ HWND BLDL_InitWindow(HINSTANCE hInstance)
 	WndClsEx.lpfnWndProc	= WndProcedure;
 	WndClsEx.cbClsExtra 	= 0;
 	WndClsEx.cbWndExtra 	= 0;
-	WndClsEx.hIcon      	= (HICON) LoadImageW(hInstance, MAKEINTRESOURCEW(IDI_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_DEFAULTCOLOR);
+	WndClsEx.hIcon      	= (HICON) LoadImageW(hInstance, MAKEINTRESOURCEW(IDC_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_DEFAULTCOLOR);
 	WndClsEx.hCursor     	= (HCURSOR) LoadImageW(NULL, MAKEINTRESOURCEW(OCR_NORMAL), IMAGE_CURSOR, GetSystemMetrics(SM_CXCURSOR), GetSystemMetrics(SM_CYCURSOR), LR_SHARED);
 	WndClsEx.hbrBackground 	= GetStockObject(WHITE_BRUSH); // 0x00
 	WndClsEx.lpszMenuName  	= NULL;
 	WndClsEx.lpszClassName 	= BL_ClassName;
 	WndClsEx.hInstance 		= hInstance;
-	WndClsEx.hIconSm      	= (HICON) LoadImageW(hInstance, MAKEINTRESOURCEW(IDI_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
+	WndClsEx.hIconSm      	= (HICON) LoadImageW(hInstance, MAKEINTRESOURCEW(IDC_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 
 	if (WndClsEx.hIcon == NULL || WndClsEx.hIconSm == NULL)
 		JV_ErrorHandle(JVERR_LoadIcon, TRUE);
@@ -134,58 +128,60 @@ void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat)
 		// EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetRes, 0);
 		EnumDisplayMonitors(NULL, NULL, BLCB_MonEnumProc_GetFullInfo, 0);
 
-		// option.monitor is pointing non-exsit monitor
-		if (!(option.monitor <= g_nMon))
+		// option.monitor is pointing non-exist monitor
+		if (!(option.monitor <= g_nMon && option.monitor <= BL_MAX_MONITOR))
 		{
 			option.monitor = BL_MON_PRIMARY;
 			JV_WarnHandle(JVWARN_OPT_INVALID_MONITOR, FALSE);
 		}
 
 		// Get this monitor's screen resolution
-		scr_x = g_monInfo[option.monitor-1].rcMonitor.right - g_monInfo[option.monitor-1].rcMonitor.left;
-		scr_y = g_monInfo[option.monitor-1].rcMonitor.bottom - g_monInfo[option.monitor-1].rcMonitor.top;
+		int monIdx = option.monitor == BL_MON_PRIMARY ? BL_MON_PRIMARY : option.monitor - 1;
+		RECT* monRect = &(g_monInfo[monIdx].rcMonitor);
+		RECT* workRect = &(g_monInfo[monIdx].rcWork);
+		scr_x = monRect->right - monRect->left;
+		scr_y = monRect->bottom - monRect->top;
 		// Non-primary monitor's virtual coordinate can be negative value
-		base_x = g_monInfo[option.monitor-1].rcMonitor.left;
-		base_y = g_monInfo[option.monitor-1].rcMonitor.top;
-
+		base_x = monRect->left;
+		base_y = monRect->top;
 
 
 		// Calculate where taskbar is, using rcWork and rcMonitor's relation.
 		// trayPos is calculated as taskbar is in PRIMARY, since coord is calculated relative to base coord of monitor.
-		if (g_monInfo[option.monitor-1].rcMonitor.top != g_monInfo[option.monitor-1].rcWork.top)
+		if (monRect->top != workRect->top)
 		{
 			// TaskBar is on TOP
 			taskbar = BL_TASKBAR_TOP;
 			trayPos.top 	= 0;
-			trayPos.bottom 	= g_monInfo[option.monitor-1].rcWork.top - g_monInfo[option.monitor-1].rcMonitor.top;
+			trayPos.bottom 	= workRect->top - monRect->top;
 			trayPos.left 	= 0;
 			trayPos.right 	= scr_x;
 		}
-		else if (g_monInfo[option.monitor-1].rcMonitor.bottom != g_monInfo[option.monitor-1].rcWork.bottom)
+		else if (monRect->bottom != workRect->bottom)
 		{
 			// TaskBar is on BOTTOM
 			taskbar = BL_TASKBAR_BOTTOM;
-			trayPos.top 	= g_monInfo[option.monitor-1].rcWork.bottom - g_monInfo[option.monitor-1].rcMonitor.top;
+			trayPos.top 	= workRect->bottom - monRect->top;
 			trayPos.bottom 	= scr_y;
 			trayPos.left 	= 0;
 			trayPos.right 	= scr_x;
 		}
-		else if (g_monInfo[option.monitor-1].rcMonitor.left != g_monInfo[option.monitor-1].rcWork.left)
+		else if (monRect->left != workRect->left)
 		{
 			// TaskBar is on LEFT
 			taskbar = BL_TASKBAR_LEFT;
 			trayPos.top 	= 0;
 			trayPos.bottom 	= scr_y;
 			trayPos.left 	= 0;
-			trayPos.right 	= g_monInfo[option.monitor-1].rcWork.left - g_monInfo[option.monitor-1].rcMonitor.left;
+			trayPos.right 	= workRect->left - monRect->left;
 		}
-		else if (g_monInfo[option.monitor-1].rcMonitor.right != g_monInfo[option.monitor-1].rcWork.right)
+		else if (monRect->right != workRect->right)
 		{
 			// TaskBar is on RIGHT
 			taskbar = BL_TASKBAR_RIGHT;
 			trayPos.top 	= 0;
 			trayPos.bottom 	= scr_y;
-			trayPos.left 	= g_monInfo[option.monitor-1].rcWork.right - g_monInfo[option.monitor-1].rcMonitor.left;
+			trayPos.left 	= workRect->right - monRect->left;
 			trayPos.right 	= scr_x;
 		}
 
@@ -511,7 +507,7 @@ void BLDL_AddTrayIcon(HWND hWnd, UINT uID, UINT flag, UINT uCallbackMsg, LPCWSTR
 		nid.uCallbackMessage = uCallbackMsg;
 
 #ifdef _MSC_VER
-	LoadIconMetric(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), LIM_SMALL, &(nid.hIcon)); // Load the icon for high DPI. However, MinGW-w64 cannot link this function...
+	LoadIconMetric(g_hInst, MAKEINTRESOURCEW(IDC_MAINICON), LIM_SMALL, &(nid.hIcon)); // Load the icon for high DPI. However, MinGW-w64 cannot link this function...
 #else
 	nid.hIcon 		= (HICON) LoadImageW(g_hInst, MAKEINTRESOURCEW(IDI_MAINICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 #endif

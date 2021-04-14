@@ -5,13 +5,8 @@
 #include <stdint.h>
 #include <windows.h>
 #include <shlwapi.h>
-#ifdef _DEBUG
-#undef __CRT__NO_INLINE
-#endif
 #include <strsafe.h>
-#ifdef _DEBUG
-#define __CRT__NO_INLINE
-#endif
+
 
 #include "BatStat.h"
 #include "DrawLine.h"
@@ -122,7 +117,7 @@ int BLBS_ReadSetting()
 		if (written_byte != sizeof(uint16_t))
 			JV_ErrorHandle(JVERR_FILEIO_WRITTEN_BYTES, FALSE);
 		// Write default setting string to File
-		if (!WriteFile(hFile, (void*) BL_DefaultSettingStr, wcslen(BL_DefaultSettingStr) * sizeof(wchar_t), (DWORD*)&written_byte, NULL))
+		if (!WriteFile(hFile, (void*) BL_DefaultSettingStr, (DWORD)(wcslen(BL_DefaultSettingStr) * sizeof(wchar_t)), (DWORD*)&written_byte, NULL))
 			JV_ErrorHandle(JVERR_WriteFile, TRUE);
 		// Is string writeen to file fully?
 		if (written_byte != wcslen(BL_DefaultSettingStr) * sizeof(wchar_t))
@@ -141,8 +136,8 @@ int BLBS_ReadSetting()
 
 		// Get file size, and dyn allocate file_buf
 		file_size = GetFileSize(hFile, NULL);
-		file_buf = (wchar_t*) malloc(file_size+16);
-		memset((void*) file_buf, 0, file_size+16);
+		file_buf = (wchar_t*) malloc((size_t)file_size+16);
+		memset((void*) file_buf, 0, (size_t)file_size+16);
 
 		// Read from file
 		if (!ReadFile(hFile, 		// hFile
@@ -617,7 +612,7 @@ int BLBS_GetBatteryStat()
 
 wchar_t* BLBS_GetIniFullPath(wchar_t* iniFullPath, const size_t bufSize)
 {
-	GetModuleFileNameW(NULL, iniFullPath, bufSize);
+	GetModuleFileNameW(NULL, iniFullPath, (DWORD)bufSize);
 	wchar_t* dirPath = StrRChrW(iniFullPath, NULL, L'\\')+1;
 	StringCbCopyW(dirPath, bufSize, BL_SettingFile);
 	return iniFullPath;

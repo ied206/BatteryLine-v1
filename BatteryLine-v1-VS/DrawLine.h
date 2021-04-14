@@ -1,5 +1,4 @@
-﻿#ifndef DRAWLINE_H_INCLUDED
-#define DRAWLINE_H_INCLUDED
+﻿#pragma once
 
 #define ID_ABOUT		2000
 #define ID_HELP			2001
@@ -29,4 +28,3 @@ void BLDL_OpenLicense(HWND hWnd);
 void BLDL_PrintBanner(HWND hWnd);
 void BLDL_PrintHelp(HWND hWnd);
 
-#endif // DRAWLINE_H_INCLUDED
