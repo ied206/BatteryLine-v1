@@ -1,5 +1,4 @@
-﻿#ifndef VAR_H_INCLUDED
-#define VAR_H_INCLUDED
+﻿#pragma once
 
 // #include "Var.h" must be included at very top of .c file
 
@@ -10,9 +9,10 @@
 #ifndef _UNICODE
 #define _UNICODE
 #endif
+
 #define OEMRESOURCE
-#define NTDDI_VERSION NTDDI_VISTA
-#define _WIN32_WINNT _WIN32_WINNT_VISTA
+
+#include "targetver.h"
 
 #include <windows.h>
 #include <stdint.h>
@@ -20,8 +20,8 @@
 // MACRO for DEBUG
 #ifdef _DEBUG
 	#define _DEBUG_CONSOLE
-	//#define _DEBUG_PARSING
-	//#define _DEBUG_MONITOR
+//#define _DEBUG_PARSING
+//#define _DEBUG_MONITOR
 #endif
 
 #define TRUE	1
@@ -32,13 +32,13 @@
 #define BL_ClassName		L"Joveler_BatteryLine"
 #define BL_SysTrayTip   	L"BatteryLine"
 #define BL_SettingFile 		L"BatteryLine.ini"
-#define BL_WebBinary		L"https://ied206.github.io/BatteryLine"
-#define BL_WebSource		L"https://github.com/ied206/BatteryLine"
+#define BL_WebBinary		L"https://github.com/ied206/BatteryLine-v1"
+#define BL_WebSource		L"https://github.com/ied206/BatteryLine-v1"
 #define BL_SysTrayID_ON		1
 #define BL_SysTrayID_OFF	2
 
 #define BL_MAJOR_VER		1
-#define BL_MINOR_VER		1
+#define BL_MINOR_VER		2
 #define BL_MSGBOX_BUF_SIZE	2048
 
 #define WM_APP_SYSTRAY_POPUP (WM_APP + 0x0001)
@@ -93,8 +93,8 @@
 
 struct bl_arg
 {
-    int quiet; // Do notification?
-    int help; // help message
+	int quiet; // Do notification?
+	int help; // help message
 };
 typedef struct bl_arg BL_ARG;
 
@@ -106,6 +106,7 @@ struct bl_option
 	uint8_t position;		// Where to show battery line? (TOP | BOTTOM | LEFT | RIGHT)
 	uint8_t taskbar;		// Evade or not if battery line is overlapped with taskbar
 	uint8_t transparency;	// Transparency of battery line
+	uint16_t refresh;		// Timer interval (set 0 to disable)
 	uint8_t height;			// Battery line's height (in pixel)
 	COLORREF defaultcolor;	// Battery line's default color
 	COLORREF chargecolor;	// Battery line's color when charging
@@ -140,5 +141,3 @@ extern int g_nPriMon; // Which monitor is primary monitor?
 extern MONITORINFO g_monInfo[BL_MAX_MONITOR];
 extern BL_MONINFO g_monRes[BL_MAX_MONITOR];
 // http://www.transmissionzero.co.uk/computing/win32-apps-with-mingw/
-
-#endif // VAR_H_INCLUDED

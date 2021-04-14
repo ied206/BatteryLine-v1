@@ -14,9 +14,9 @@
 void JV_ErrorHandle(int code, int iswinapi)
 {
 	char *msg = NULL;
-	#ifndef _DEBUG_CONSOLE
+#ifndef _DEBUG_CONSOLE
 	wchar_t buf[ERR_BUF_SIZE], bufapi[ERR_BUF_SIZE], msgbuf[ERR_BUF_SIZE];
-	#endif
+#endif
 
 	switch (code)
 	{
@@ -156,6 +156,10 @@ void JV_ErrorHandle(int code, int iswinapi)
 		msg =	"ErrorMessage : JVERR_OPT_INI_TOO_MUCH_COLOR\n"
 				"Too much color in BetteryLine.ini. Check \'[Color] Section\'.\n";
 		break;
+	case JVERR_OPT_INI_INVALID_REFRESH:
+		msg =	"ErrorMessage : JVERR_OPT_INI_INVALID_REFRESH\n"
+				"Too much color in BetteryLine.ini. Check \'[Color] Section\'.\n";
+		break;
 	// 25x
 	case JVERR_OPT_INVALID_TASKBAR:
 		msg =	"ErrorMessage : JVERR_OPT_INVALID_TASKBAR\n"
@@ -177,11 +181,11 @@ void JV_ErrorHandle(int code, int iswinapi)
 		break;
 	}
 
-	#ifdef _DEBUG_CONSOLE
-    printf("ErrorCode : %d\n%s", code, msg);
-    if (iswinapi)
+#ifdef _DEBUG_CONSOLE
+	printf("ErrorCode : %d\n%s", code, msg);
+	if (iswinapi)
 		printf("WinAPI LastError = %lu\n", GetLastError());
-	#else
+#else
 	if (iswinapi)
 		StringCchPrintfW(bufapi, ERR_BUF_SIZE, L"WinAPI LastError = %lu\n", GetLastError());
 	else
@@ -189,7 +193,7 @@ void JV_ErrorHandle(int code, int iswinapi)
 	MultiByteToWideChar(CP_ACP, 0, msg, -1, msgbuf, ERR_BUF_SIZE);
 	StringCchPrintfW(buf, ERR_BUF_SIZE, L"ErrorCode : %d\n%ws%ws", code, msgbuf, bufapi);
 	MessageBoxW(NULL, buf, L"Error", MB_ICONERROR | MB_OK);
-	#endif
+#endif
 
 	exit(code);
 }
@@ -197,9 +201,9 @@ void JV_ErrorHandle(int code, int iswinapi)
 void JV_WarnHandle(int code, int iswinapi)
 {
 	char *msg = NULL;
-	#ifndef _DEBUG_CONSOLE
+#ifndef _DEBUG_CONSOLE
 	wchar_t buf[ERR_BUF_SIZE], bufapi[ERR_BUF_SIZE], msgbuf[ERR_BUF_SIZE];
-	#endif
+#endif
 
 	switch (code)
 	{
@@ -217,12 +221,12 @@ void JV_WarnHandle(int code, int iswinapi)
 		break;
 	}
 
-	#ifdef _DEBUG_CONSOLE
-    printf("WarnCode : %d\n%s", code, msg);
-    if (iswinapi)
+#ifdef _DEBUG_CONSOLE
+	printf("WarnCode : %d\n%s", code, msg);
+	if (iswinapi)
 		printf("WinAPI LastError = %lu\n", GetLastError());
 	putchar('\n');
-	#else
+#else
 	if (iswinapi)
 		StringCchPrintfW(bufapi, ERR_BUF_SIZE, L"WinAPI LastError = %lu\n", GetLastError());
 	else
@@ -230,5 +234,5 @@ void JV_WarnHandle(int code, int iswinapi)
 	MultiByteToWideChar(CP_ACP, 0, msg, -1, msgbuf, ERR_BUF_SIZE);
 	StringCchPrintfW(buf, ERR_BUF_SIZE, L"WarnCode : %d\n%ws%ws", code, msgbuf, bufapi);
 	MessageBoxW(NULL, buf, L"Warning", MB_ICONWARNING | MB_OK);
-	#endif
+#endif
 }

@@ -1,5 +1,4 @@
-﻿#ifndef DRAWLINE_H_INCLUDED
-#define DRAWLINE_H_INCLUDED
+﻿#pragma once
 
 #define ID_ABOUT		2000
 #define ID_HELP			2001
@@ -13,6 +12,7 @@ HWND BLDL_InitWindow(HINSTANCE hInstance);
 void BLDL_SetWindowPos(HWND hWnd, SYSTEM_POWER_STATUS* stat);
 void BLCB_WM_PAINT(HWND hWnd);
 void BLCB_SetWindowPos(HWND hWnd);
+void BLDL_SetTimer(hWnd);
 void BLCB_WM_CLOSE(HWND hWnd, uint8_t postquit);
 BOOL BLDL_ShowPopupMenu(HWND hWnd, POINT *curpos, int wDefaultItem);
 
@@ -29,4 +29,3 @@ void BLDL_OpenLicense(HWND hWnd);
 void BLDL_PrintBanner(HWND hWnd);
 void BLDL_PrintHelp(HWND hWnd);
 
-#endif // DRAWLINE_H_INCLUDED
